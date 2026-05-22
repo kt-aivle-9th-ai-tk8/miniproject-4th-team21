@@ -1,7 +1,7 @@
 import BookForm from "./BookForm";
 
 // App.jsx 하위 부모 컴포넌트 - 책 신규 작성/등록 페이지
-function AddBook({ setView, bookList, setBookList }) {
+function AddBook({ onTransform, bookList, setBookList }) {
     const handleSubmit = async (bookData) => {
         // 첫 번째 async/await
         try {
@@ -20,7 +20,6 @@ function AddBook({ setView, bookList, setBookList }) {
 
             if (response.ok) {
                 alert("책이 성공적으로 등록되었습니다.");
-                setView("list"); // 책 목록 페이지로 이동
             } else {
                 alert("책 등록에 실패했습니다.");
             }
@@ -32,6 +31,7 @@ function AddBook({ setView, bookList, setBookList }) {
         try {
             const newBook = await response.json();
             setBookList([...bookList, newBook]);
+            onTransform("view", newBook.id); // 책 목록 페이지로 이동
         } catch (error) {
             console.error("Error parsing response:", error);
             alert("책 목록 갱신에 실패했습니다.");

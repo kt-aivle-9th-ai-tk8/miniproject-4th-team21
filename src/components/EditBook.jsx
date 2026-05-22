@@ -1,7 +1,7 @@
 import BookForm from "./BookForm";
 
 // App.jsx 하위 부모 컴포넌트 - 책 내용 수정 페이지
-function EditBook({ book, setView, bookList, setBookList }) {
+function EditBook({ book, onTransform, bookList, setBookList }) {
     const handleSubmit = async (bookData) => {
         // 첫 번째 async/await
         try {
@@ -20,7 +20,6 @@ function EditBook({ book, setView, bookList, setBookList }) {
 
             if (response.ok) {
                 alert("책이 성공적으로 수정되었습니다.");
-                setView("list"); // 책 목록 페이지로 이동
             } else {
                 alert("책 수정에 실패했습니다.");
             }
@@ -36,6 +35,7 @@ function EditBook({ book, setView, bookList, setBookList }) {
                     (book.id === newBook.id ? newBook : book)
                 )
             );
+            onTransform("view", book.id);
         } catch (error) {
             console.error("Error parsing response:", error);
             alert("책 목록 갱신에 실패했습니다.");
