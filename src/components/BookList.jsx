@@ -1,6 +1,6 @@
 import BookItem from './BookItem';
 
-function BookList({books, onDelete}) {
+function BookList({books, onDelete, onTransform}) {
     return (
         <div className='list-container'>
             <header className='list-header'>
@@ -22,6 +22,7 @@ function BookList({books, onDelete}) {
                         coverImageUrl={b.coverImageUrl}
                         createdAt={b.createdAt}
                         onDelete={onDelete}
+                        onTransform={onTransform}
                     />
                 ))}
             </ul>
