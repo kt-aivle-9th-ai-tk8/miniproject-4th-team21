@@ -1,12 +1,10 @@
+import { useEffect } from "react";
+
 function RemoveBook({book, onDelete, onTransform, prevPage}) {
-    // book 데이터 못 받거나 로딩 필요할 때
-    if (!book) {
-        return (
-            <div className="remove-container">
-                <p>도서 정보를 불러오는 중입니다...</p>
-                <button onClick={() => onTransform('list')}>목록으로 돌아가기</button>
-            </div>
-        );
+    // book 데이터 없을 때
+    if (book === null || book === undefined) {
+        onTransform('unavailable');
+        return null;
     }
 
     // 삭제 확인 시 '확인' 눌렀을 때
