@@ -12,6 +12,7 @@ function App() {
   const [books, setBooks] = useState([]); // 전체 도서 목록 상태
   const [currentView, setCurrentView] = useState('list'); // 현재 화면 (list, add, edit, view, remove)
   const [selectedBookId, setSelectedBookId] = useState(null); // 선택된 도서의 ID 관리
+  const [prevPage, setPrevPage] = useState('list'); // 이전 페이지(화면) 저장
 
   // json-server 연동을 위한 베이스 URL
   const API_URL = 'http://localhost:3000/books';
@@ -35,6 +36,7 @@ function App() {
 
   // 3. 화면 전환 핸들러 (인자: bookId정수값, view이름)
   const handleTransform = (viewName, bookId) => {
+    setPrevPage(currentView); // 화면 전환전 화면을 저장
     setCurrentView(viewName);
     setSelectedBookId(bookId);
   };
@@ -119,7 +121,7 @@ function App() {
         if (!currentBook)
           return (
             <>
-              <h1><center>책 정보를 찾을 수 없습니다. 도서 리스트로 돌아가십시오</center></h1>
+              <h1><center>다책 정보를 찾을 수 없습니. 도서 리스트로 돌아가십시오</center></h1>
               {/*예쁜 코드로 수정 필요 & 오류방지용 간단 작성*/}
             </>
           );
@@ -128,6 +130,7 @@ function App() {
             book={currentBook} 
             onRevise={handleRevise} 
             onTransform={handleTransform}
+            prevPage={prevPage}
           />
         );
       case 'view':
@@ -157,6 +160,7 @@ function App() {
             book={currentBook}
             onDelete={handleDelete} 
             onTransform={handleTransform}
+            prevPage={prevPage}
           />
         );
       default:
