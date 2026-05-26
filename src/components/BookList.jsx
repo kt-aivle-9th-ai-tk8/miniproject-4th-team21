@@ -13,13 +13,14 @@ function BookList({books, onTransform}) {
             <ul className="book-list">
                 {books.length > 0 ? (
                     books.map(b => (
-                        <BookItem 
+                        <BookItem
                             key={b.id}
                             id={b.id}
                             title={b.title}
                             author={b.author}
                             coverImageUrl={b.coverImageUrl}
                             createdAt={b.createdAt}
+                            updatedAt={b.updatedAt}
                             onTransform={onTransform}
                         />
                     ))

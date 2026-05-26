@@ -29,7 +29,7 @@ function AddBook({ onTransform, onSubmit }) {
     };
 
     return (
-        <>
+        <div className="form-page-container">
             <h1>책 신규 작성/등록</h1>
             <BookForm
                 book={newBook}
@@ -44,7 +44,7 @@ function AddBook({ onTransform, onSubmit }) {
                     취소
                 </button>
             </div>
-        </>
+        </div>
     );
 }
 

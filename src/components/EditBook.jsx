@@ -29,7 +29,7 @@ function EditBook({ onTransform, onRevise, book, prevPage }) {
     };
 
     return (
-        <>
+        <div className="form-page-container">
             <h1>책 내용 수정</h1>
             <BookForm
                 book={newBook}
@@ -44,7 +44,7 @@ function EditBook({ onTransform, onRevise, book, prevPage }) {
                     취소
                 </button>
             </div>
-        </>
+        </div>
     );
 }
 
