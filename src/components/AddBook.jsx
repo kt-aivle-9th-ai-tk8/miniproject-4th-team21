@@ -35,7 +35,7 @@ function AddBook({ onTransform, onSubmit }) {
                 book={newBook}
                 onFieldChange={handleFieldChange}
             />
-            <BookCoverAIRequest book={newBook} />
+            <BookCoverAIRequest book={newBook} onFieldChange={handleFieldChange} />
             <div className="button-group">
                 <button type="button" onClick={handleSubmit} className="submit-button">
                     등록
