@@ -1,6 +1,6 @@
 function Header({ onTransform, currentPage }) {
   
-  const currentPage = 'helloworld';
+  //const currentPage = 'helloworld';
   const headerStyle = {
     display: 'flex',
     justifyContent: 'space-between',
