@@ -47,11 +47,19 @@ function App() {
   // 신규 도서 등록 (onSubmit)
   const handleSubmit = async (bookObject) => {
     try {
+      const currentTime = new Date().toLocaleString();
+      const bookWithTimestamps = {
+        ...bookObject,
+        createdAt: currentTime,
+        updatedAt: currentTime
+      };
+      
       const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookObject),
+        body: JSON.stringify(bookWithTimestamps),
       });
+
       if (response.ok) {
         const newBook = await response.json();
         setBooks(prevBooks => [...prevBooks, newBook]); // await fetchBooks(); // 목록 갱신
@@ -66,11 +74,18 @@ function App() {
   // 기존 도서 수정 (onRevise)
   const handleRevise = async (bookId, bookObject) => {
     try {
+      const currentTime = new Date().toLocaleString();
+      const bookWithTimestamps = {
+        ...bookObject,
+        updatedAt: currentTime
+      };
+
       const response = await fetch(`${API_URL}/${bookId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookObject),
+        body: JSON.stringify(bookWithTimestamps),
       });
+      
       if (response.ok) {
         const revisedBook = await response.json();
         setBooks(prevBooks => prevBooks.map(book => book.id === bookId ? revisedBook : book)); // await fetchBooks(); // 목록 갱신
