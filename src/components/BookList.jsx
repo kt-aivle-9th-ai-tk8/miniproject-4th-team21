@@ -8,7 +8,6 @@ function BookList({books, onTransform}) {
                     <h1>도서 목록</h1>
                     <p>현재 등록된 전체 도서를 확인하고 관리합니다.</p>
                 </div>
-                <button className='add-btn'>도서 등록</button>
             </header>
 
             <ul className="book-list">
