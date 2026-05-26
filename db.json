@@ -1,13 +1,22 @@
 {
   "books": [
     {
-      "id": 1,
       "title": "Book Title",
       "author": "Author Name",
       "content": "Book content...",
       "coverImageUrl": "https://example.com/cover.jpg",
       "createdAt": "2023-01-01T00:00:00Z",
-      "updatedAt": "2023-01-01T00:00:00Z"
+      "updatedAt": "2023-01-01T00:00:00Z",
+      "id": 1
+    },
+    {
+      "id": 2,
+      "title": "ㄹㄴㅁㄹㅇㅁㄴㅇㄴ",
+      "author": "ㄱㄷㄱㅈㅁ",
+      "content": "ㅍㅊㅋ",
+      "coverImageUrl": "",
+      "createdAt": null,
+      "updatedAt": null
     }
   ]
 }
