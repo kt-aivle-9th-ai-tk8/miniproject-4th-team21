@@ -4,14 +4,9 @@ import Footer from './components/Footer';
 import BookList from './components/BookList';
 import AddBook from './components/AddBook';
 import EditBook from './components/EditBook';
-<<<<<<< HEAD
 import ViewBook from './components/ViewBook';
 import RemoveBook from './components/RemoveBook';
 import UnavailableBook from './components/UnavailableBook';
-=======
-// import ViewBook from './components/ViewBook';
-// import RemoveBook from './components/RemoveBook';
->>>>>>> 04d88f8e4b491b79235507aa6ad37e5c75cb7ead
 
 function App() {
   // 1. 상태(State) 관리
