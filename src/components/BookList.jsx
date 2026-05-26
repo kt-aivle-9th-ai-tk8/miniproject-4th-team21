@@ -12,22 +12,24 @@ function BookList({books, onDelete, onTransform}) {
             </header>
 
             <ul className="book-list">
-                {books.map(b => (
-                    <BookItem 
-                        key={b.id}
-                        id={b.id}
-                        title={b.title}
-                        author={b.author}
-                        content={b.content}
-                        coverImageUrl={b.coverImageUrl}
-                        createdAt={b.createdAt}
-                        onDelete={onDelete}
-                        onTransform={onTransform}
-                    />
-                ))}
+                {books.length > 0 ? (
+                    books.map(b => (
+                        <BookItem 
+                            key={b.id}
+                            id={b.id}
+                            title={b.title}
+                            author={b.author}
+                            coverImageUrl={b.coverImageUrl}
+                            createdAt={b.createdAt}
+                            onTransform={onTransform}
+                        />
+                    ))
+                ) : (
+                    <p>등록된 도서가 없습니다.</p>
+                )}
             </ul>
         </div>
     );
 }
 
-export default BookList
+export default BookList;
