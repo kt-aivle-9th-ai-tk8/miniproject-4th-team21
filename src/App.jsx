@@ -48,7 +48,7 @@ function App() {
   // 신규 도서 등록 (onSubmit)
   const handleSubmit = async (bookObject) => {
     try {
-      const currentTime = new Date().toLocaleString();
+      const currentTime = new Date().toISOString();
       const bookWithTimestamps = {
         ...bookObject,
         createdAt: currentTime,
@@ -75,7 +75,7 @@ function App() {
   // 기존 도서 수정 (onRevise)
   const handleRevise = async (bookId, bookObject) => {
     try {
-      const currentTime = new Date().toLocaleString();
+      const currentTime = new Date().toISOString();
       const bookWithTimestamps = {
         ...bookObject,
         updatedAt: currentTime
