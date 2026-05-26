@@ -1,6 +1,13 @@
 import React from 'react';
 
-function BookForm({ form, onChange, mode }) {
+function BookForm({ book, onFieldChange }) {
+    const handleChange = (field) => (e) => {
+        onFieldChange({
+            ...book,
+            [field]: e.target.value
+        });
+    };
+
     const containerStyle = {
         backgroundColor: '#ffffff',
         borderRadius: '12px',
@@ -44,31 +51,33 @@ function BookForm({ form, onChange, mode }) {
                     <input
                         type="text"
                         style={inputStyle}
-                        placeholder="예: 클린 코드"
-                        value={form.title}
-                        onChange={onChange('title')}
+                        placeholder="예: 도서명을 입력하세요"
+                        value={book.title}
+                        onChange={handleChange('title')}
                         required
                     />
                 </div>
+
                 <div style={itemStyle}>
                     <label style={labelStyle}>저자 <span style={{ color: 'red' }}>*</span></label>
                     <input
                         type="text"
                         style={inputStyle}
-                        placeholder="예: 로버트 C. 마틴"
-                        value={form.author}
-                        onChange={onChange('author')}
+                        placeholder="예: 저자를 입력하세요"
+                        value={book.author}
+                        onChange={handleChange('author')}
                         required
                     />
                 </div>
             </div>
+
             <div style={{ width: '100%' }}>
                 <label style={labelStyle}>상세 설명</label>
                 <textarea
                     style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }}
                     placeholder="도서에 대한 간단한 요약이나 설명을 입력하세요."
-                    value={form.content}
-                    onChange={onChange('content')}
+                    value={book.content}
+                    onChange={handleChange('content')}
                 />
             </div>
         </div>
@@ -76,4 +85,3 @@ function BookForm({ form, onChange, mode }) {
 }
 
 export default BookForm;
-
