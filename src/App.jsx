@@ -4,13 +4,19 @@ import Footer from './components/Footer';
 import BookList from './components/BookList';
 import AddBook from './components/AddBook';
 import EditBook from './components/EditBook';
+<<<<<<< HEAD
+import ViewBook from './components/ViewBook';
+import RemoveBook from './components/RemoveBook';
+import UnavailableBook from './components/UnavailableBook';
+=======
 // import ViewBook from './components/ViewBook';
 // import RemoveBook from './components/RemoveBook';
+>>>>>>> 04d88f8e4b491b79235507aa6ad37e5c75cb7ead
 
 function App() {
   // 1. 상태(State) 관리
   const [books, setBooks] = useState([]); // 전체 도서 목록 상태
-  const [currentView, setCurrentView] = useState('list'); // 현재 화면 (list, add, edit, view, remove)
+  const [currentView, setCurrentView] = useState('list'); // 현재 화면 (list, add, edit, view, remove, unavailable)
   const [selectedBookId, setSelectedBookId] = useState(null); // 선택된 도서의 ID 관리
   const [prevPage, setPrevPage] = useState('list'); // 이전 페이지(화면) 저장
 
@@ -163,6 +169,10 @@ function App() {
             prevPage={prevPage}
           />
         );
+      case 'unavailable': 
+        return (
+          <UnavailableBook />
+        );
       default:
         return <BookList books={books} onTransform={handleTransform} />;
     }
@@ -171,7 +181,7 @@ function App() {
   return (
     <div className="app-container">
       {/* 공통 헤더 컴포넌트 */}
-      <Header onTransform={handleTransform} />
+      <Header onTransform={handleTransform} currentPage={currentView} />
       
       {/* 메인 콘텐츠 영역 (조건부 렌더링) */}
       <main className="main-content">
