@@ -3,7 +3,7 @@ import BookForm from "./BookForm";
 // import BookCoverAIRequest from "./BookCoverAIRequest";
 
 // App.jsx 하위 부모 컴포넌트 - 책 내용 수정 페이지
-function EditBook({ onTransform, onRevise, book }) {
+function EditBook({ onTransform, onRevise, book, prevPage }) {
 
     const [newBook, setNewBook] = useState({
         id: book.id,
@@ -40,7 +40,7 @@ function EditBook({ onTransform, onRevise, book }) {
                 <button type="button" onClick={handleSubmit} className="submit-button">
                     등록
                 </button>
-                <button type="button" onClick={() => onTransform("list", null)} className="cancel-button">
+                <button type="button" onClick={() => onTransform(prevPage, null)} className="cancel-button">
                     취소
                 </button>
             </div>
