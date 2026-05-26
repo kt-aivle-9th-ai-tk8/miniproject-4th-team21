@@ -1,11 +1,6 @@
-// src/components/Header.jsx
-import React from 'react';
-
-// [개념 연결]: 부모(App.jsx)로부터 화면 전환용 무전기 'onTransform'과 
-// 현재 불빛을 켤 위치를 알기 위해 'currentPage'를 props로 수령합니다.
 function Header({ onTransform, currentPage }) {
   
-  // 가이드라인에 정의된 신뢰감을 주는 파란색 테마 스타일링
+  const currentPage = 'helloworld';
   const headerStyle = {
     display: 'flex',
     justifyContent: 'space-between',
@@ -34,26 +29,24 @@ function Header({ onTransform, currentPage }) {
     <header style={headerStyle}>
       {/* 로고 영역: 클릭 시 규칙대로 메인 목록으로 전환 */}
       <h2 
-        onClick={() => onTransform('도서목록', null)} 
+        onClick={() => onTransform('list', null)} 
         style={{ margin: 0, cursor: 'pointer' }}
       >
         📘 도서 관리 시스템
       </h2>
 
       <nav>
-        {/* ⭐ [코드 연결 포인트 1]: 도서 목록 버튼 클릭 시 */}
-        {/* 규격인 인자 ('도서목록', null)를 정확히 매개변수로 실어 보냅니다. */}
         <button 
-          style={buttonStyle('도서목록')} 
-          onClick={() => onTransform('도서목록', null)}
+          style={buttonStyle('list')} 
+          onClick={() => onTransform('list', null)}
         >
           도서 목록
         </button>
         
         
         <button 
-          style={{ ...buttonStyle('도서등록'), backgroundColor: currentPage === '도서등록' ? '#c2185b' : '#E91E63' }} 
-          onClick={() => onTransform('도서등록', null)}
+          style={{ ...buttonStyle('add'), backgroundColor: currentPage === 'add' ? '#c2185b' : '#E91E63' }} 
+          onClick={() => onTransform('add', null)}
         >
           새 도서 등록
         </button>
