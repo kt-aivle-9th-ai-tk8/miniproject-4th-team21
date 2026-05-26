@@ -1,5 +1,3 @@
-import { useEffect } from "react";
-
 function RemoveBook({book, onDelete, onTransform, prevPage}) {
     // book 데이터 없을 때
     if (book === null || book === undefined) {

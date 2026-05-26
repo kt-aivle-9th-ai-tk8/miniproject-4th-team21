@@ -1,6 +1,6 @@
 import BookItem from './BookItem';
 
-function BookList({books, onDelete, onTransform}) {
+function BookList({books, onTransform}) {
     return (
         <div className='list-container'>
             <header className='list-header'>
