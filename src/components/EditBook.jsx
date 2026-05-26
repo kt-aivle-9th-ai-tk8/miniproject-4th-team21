@@ -1,15 +1,18 @@
 import { useState } from "react";
 import BookForm from "./BookForm";
-// import BookCoverAIRequest from "./BookCoverAIRequest";
+import BookCoverAIRequest from "./BookCoverAIRequest";
 
 // App.jsx 하위 부모 컴포넌트 - 책 내용 수정 페이지
 function EditBook({ onTransform, onRevise, book }) {
 
     const [newBook, setNewBook] = useState({
+        id: book.id,
         title: book.title,
         author: book.author,
         content: book.content,
-        coverUrl: book.coverUrl
+        coverImageUrl: book.coverImageUrl,
+        createdAt: book.createdAt,
+        updatedAt: book.updatedAt
     });
 
     const handleFieldChange = (updatedBook) => {
@@ -32,9 +35,7 @@ function EditBook({ onTransform, onRevise, book }) {
                 book={newBook}
                 onFieldChange={handleFieldChange}
             />
-            {/*
             <BookCoverAIRequest book={newBook} />
-            */}
             <div className="button-group">
                 <button type="button" onClick={handleSubmit} className="submit-button">
                     등록
