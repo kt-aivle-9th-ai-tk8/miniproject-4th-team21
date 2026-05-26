@@ -41,7 +41,6 @@ export default function ViewBook({ bookId, onTransform }) {
 
   return (
     <main className="flex-grow pt-lg pb-xl px-margin max-w-7xl mx-auto w-full">
-      {/* 뒤로 가기 버튼: onTransform('list') 작동 */}
       <div 
         onClick={() => onTransform('list')}
         className="mb-sm flex items-center gap-xs text-on-surface-variant font-body2 text-body2 hover:text-primary transition-colors cursor-pointer w-fit"
@@ -55,7 +54,6 @@ export default function ViewBook({ bookId, onTransform }) {
       <div className="grid grid-cols-1 md:grid-cols-12 gap-gutter items-start">
         <div className="md:col-span-4 lg:col-span-3 flex justify-center md:justify-start">
           <div className="relative group w-full max-w-[280px] bg-surface-container-lowest p-2 rounded-xl shadow-sm border border-outline-variant/30">
-            {/* 변수명 일치: coverImageUrl */}
             {book.coverImageUrl ? (
               <img alt="Book Cover" className="w-full object-cover rounded-lg shadow-sm aspect-[2/3]" src={book.coverImageUrl} />
             ) : (
@@ -84,7 +82,6 @@ export default function ViewBook({ bookId, onTransform }) {
           
           <div className="mt-lg">
             <h3 className="font-h6 text-h6 text-on-surface mb-sm">도서 소개</h3>
-            {/* 변수명 일치: content */}
             <p className="font-body1 text-body1 text-on-surface-variant leading-relaxed">
               {book.content}
             </p>
