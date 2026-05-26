@@ -100,13 +100,6 @@ function App() {
 
   // 5. 조건부 렌더링을 통한 화면 제어
   const renderView = () => {
-    if (!currentBook)
-      return (
-        <>
-          <h1><center>책 정보를 찾을 수 없습니다. 도서 리스트로 돌아가십시오</center></h1>
-          {/*예쁜 코드로 수정 필요 & 오류방지용 간단 작성*/}
-        </>
-      );
     switch (currentView) {
       case 'list':
         return (
@@ -123,6 +116,13 @@ function App() {
           />
         );
       case 'edit':
+        if (!currentBook)
+          return (
+            <>
+              <h1><center>책 정보를 찾을 수 없습니다. 도서 리스트로 돌아가십시오</center></h1>
+              {/*예쁜 코드로 수정 필요 & 오류방지용 간단 작성*/}
+            </>
+          );
         return (
           <EditBook 
             book={currentBook} 
@@ -131,6 +131,13 @@ function App() {
           />
         );
       case 'view':
+        if (!currentBook)
+          return (
+            <>
+              <h1><center>책 정보를 찾을 수 없습니다. 도서 리스트로 돌아가십시오</center></h1>
+              {/*예쁜 코드로 수정 필요 & 오류방지용 간단 작성*/}
+            </>
+          );
         return (
           <ViewBook 
             book={currentBook} 
@@ -138,6 +145,13 @@ function App() {
           />
         );
       case 'remove':
+        if (!currentBook)
+          return (
+            <>
+              <h1><center>책 정보를 찾을 수 없습니다. 도서 리스트로 돌아가십시오</center></h1>
+              {/*예쁜 코드로 수정 필요 & 오류방지용 간단 작성*/}
+            </>
+          );
         return (
           <RemoveBook 
             book={currentBook}
