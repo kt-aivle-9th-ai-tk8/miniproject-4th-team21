@@ -6,7 +6,7 @@ function BookCoverAIRequest({ book, onFieldChange }) {
     // UI 입력값 상태 관리
     const [userApiKey, setUserApiKey] = useState("");
     const [selectedModel, setSelectedModel] = useState("gpt-image-2");
-    const [selectedQuality, setSelectedQuality] = useState("Medium");
+    const [selectedQuality, setSelectedQuality] = useState("medium");
     const [loading, setLoading] = useState(false);
 
     async function handleGenerateCover() {
@@ -45,6 +45,7 @@ function BookCoverAIRequest({ book, onFieldChange }) {
 
             // 3. json-server에 coverImageUrl만 PATCH
             // 바뀔 필드만 body에 담아 전송
+            /* 
             const patchRes = await fetch(`http://localhost:3000/books/${book.id}`, {
                 method: 'PATCH',
                 headers: { 'Content-Type': 'application/json' },
@@ -55,10 +56,13 @@ function BookCoverAIRequest({ book, onFieldChange }) {
 
             if (!patchRes.ok) throw new Error('서버 저장 실패');
             
-            const updatedBook = await patchRes.json();
+            const updatedBook = await patchRes.json(); */
 
             // 4. 상태 업데이트 -> 화면 반영
-            onFieldChange(updatedBook);
+            onFieldChange({
+                ...book,
+                coverImageUrl: imageSrc
+            });
             alert("표지 생성 완료");
 
         } catch (error) {
@@ -105,8 +109,8 @@ return (
                         <div>
                             <label>품질</label>
                             <select value={selectedQuality} onChange={(e) => setSelectedQuality(e.target.value)}>
-                                <option value="Medium">Medium</option>
-                                <option value="High">High</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
                             </select>
                         </div>
                     </div>
