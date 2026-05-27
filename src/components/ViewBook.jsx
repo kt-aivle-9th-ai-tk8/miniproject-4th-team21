@@ -1,32 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 
-export default function ViewBook({ bookId, onTransform }) {
-  const [book, setBook] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+export default function ViewBook({ book, onTransform }) {
 
   useEffect(() => {
-    async function loadBook() {
-      try {
-        const res = await fetch(`http://localhost:3000/books/${bookId}`);
-        if (!res.ok) throw new Error('도서 정보를 불러오지 못했습니다.');
-        const data = await res.json();
-        setBook(data);
-      } catch (err) {
-        console.error(err);
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
+    if (!book) {
+      onTransform('unavailable');
     }
-    if (bookId) loadBook();
-  }, [bookId]);
+  }, [book, onTransform]);
 
   const handleDelete = async () => {
     if (!window.confirm('정말 이 도서를 삭제하시겠습니까?')) return; 
     
     try {
-      await fetch(`http://localhost:3000/books/${bookId}`, { method: 'DELETE' });
+      await fetch(`http://localhost:3000/books/${book.id}`, { method: 'DELETE' });
       alert('삭제되었습니다.');
       onTransform('list'); 
     } catch (err) {
@@ -35,9 +21,7 @@ export default function ViewBook({ bookId, onTransform }) {
     }
   };
 
-  if (loading) return <div className="text-center py-20">데이터를 불러오는 중...</div>;
-  if (error) return <div className="text-center py-20 text-red-500">에러 발생: {error}</div>;
-  if (!book) return <div className="text-center py-20">해당 도서를 찾을 수 없습니다.</div>;
+  if (!book) return null;
 
   return (
     <main className="flex-grow pt-lg pb-xl px-margin max-w-7xl mx-auto w-full">
@@ -91,7 +75,7 @@ export default function ViewBook({ bookId, onTransform }) {
             <button onClick={handleDelete} className="bg-[#e53935] text-white hover:bg-error/90 font-button text-button px-8 py-2.5 rounded shadow-sm transition-colors">
               도서삭제
             </button>
-            <button onClick={() => onTransform('edit', bookId)} className="bg-surface-container text-on-surface hover:bg-surface-container-highest border border-outline-variant font-button text-button px-8 py-2.5 rounded transition-colors">
+            <button onClick={() => onTransform('edit', book.id)} className="bg-surface-container text-on-surface hover:bg-surface-container-highest border border-outline-variant font-button text-button px-8 py-2.5 rounded transition-colors">
               정보 수정
             </button>
           </div>
