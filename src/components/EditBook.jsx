@@ -40,7 +40,7 @@ function EditBook({ onTransform, onRevise, book, prevPage }) {
                 <button type="button" onClick={handleSubmit} className="submit-button">
                     등록
                 </button>
-                <button type="button" onClick={() => onTransform(prevPage, null)} className="cancel-button">
+                <button type="button" onClick={() => onTransform(prevPage, book.id)} className="cancel-button">
                     취소
                 </button>
             </div>
