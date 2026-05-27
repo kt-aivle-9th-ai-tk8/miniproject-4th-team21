@@ -19,7 +19,7 @@ export default function ViewBook({ book, onTransform }) {
     <div>
       {/* 뒤로가기 */}
       <div>
-        <button onClick={() => onTransform('list')}>목록으로 돌아가기</button>
+        <button onClick={() => onTransform('list', null)}>목록으로 돌아가기</button>
       </div>
 
       {/* 제목 */}
