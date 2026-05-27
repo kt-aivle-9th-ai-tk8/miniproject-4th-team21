@@ -66,7 +66,7 @@ function BookCoverAIRequest({ book, onFieldChange }) {
                             role: "user",
                             content: book.content
                         }
-                    ], max_tokens: 300 // 말 길어지는 거 차단
+                    ], max_tokens: 300
                 })
             });
 
@@ -103,22 +103,7 @@ function BookCoverAIRequest({ book, onFieldChange }) {
             // b64_json을 Data URL 형태로 변환
             const imageSrc = `data:image/png;base64,${b64Json}`;
 
-            // 3. json-server에 coverImageUrl만 PATCH
-            // 바뀔 필드만 body에 담아 전송
-            /* 
-            const patchRes = await fetch(`http://localhost:3000/books/${book.id}`, {
-                method: 'PATCH',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    coverImageUrl: imageSrc,
-                }),
-            });
-
-            if (!patchRes.ok) throw new Error('서버 저장 실패');
-            
-            const updatedBook = await patchRes.json(); */
-
-            // 4. 상태 업데이트 -> 화면 반영
+            // 3. 상태 업데이트 -> 화면 반영
             onFieldChange({
                 ...book,
                 coverImageUrl: imageSrc
