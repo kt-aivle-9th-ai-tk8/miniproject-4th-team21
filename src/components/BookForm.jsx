@@ -79,10 +79,10 @@ function BookForm({ book, onFieldChange }) {
             </div>
 
             <div className="form-group">
-                <label className="form-label">상세 설명</label>
+                <label className="form-label">도서 내용</label>
                 <textarea
                     className="form-input form-textarea"
-                    placeholder="도서에 대한 간단한 요약이나 설명을 입력하세요"
+                    placeholder="도서의 내용을 작성하세요"
                     value={book.content}
                     onChange={handleChange('content')}
                     onBlur={handleBlur('content')}
