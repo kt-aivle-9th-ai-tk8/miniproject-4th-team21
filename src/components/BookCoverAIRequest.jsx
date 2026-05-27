@@ -24,6 +24,28 @@ function BookCoverAIRequest({ book, onFieldChange }) {
         [Crucial]: DO NOT include any 3D book spine, pages, folds, shadows, or background scenery behind the book. DO NOT write any other text except the title.`;
     }
 
+    // HTTP 상태 코드별 사용자 안내 문구 생성 (401/429/기타)
+    const buildHttpErrorMessage = (status, contextLabel) => {
+        if (status === 401) {
+            return `[${contextLabel}] 인증 실패 (401 Unauthorized)\n입력하신 OpenAI API Key가 올바른지 확인해주세요.`;
+        }
+        if (status === 429) {
+            return `[${contextLabel}] 요청 한도 초과 (429 Rate Limit)\n잠시 후 다시 시도해주세요.`;
+        }
+        return `[${contextLabel}] 요청 실패 (HTTP ${status})\n잠시 후 다시 시도해주세요.`;
+    };
+
+    // 응답 JSON 파싱 (실패 시 사용자 안내 후 null 반환)
+    const safeParseJson = async (response, contextLabel) => {
+        try {
+            return await response.json();
+        } catch (e) {
+            console.error(`[${contextLabel}] JSON 파싱 실패:`, e);
+            alert(`[${contextLabel}] 응답 형식이 올바르지 않습니다.\n잠시 후 다시 시도해주세요.`);
+            return null;
+        }
+    };
+
     async function handleGenerateCover() {
         if (!userApiKey) {
             alert("API Key를 입력해주세요.");
@@ -43,6 +65,7 @@ function BookCoverAIRequest({ book, onFieldChange }) {
 
         setLoading(true);
         try {
+            // ── 1. 도서 내용 요약 ───────────────────────────────
             const summaryRes = await fetch(OPENAPI_SUMMARY_API_URL, {
                 method: "POST",
                 headers: {
@@ -56,9 +79,9 @@ function BookCoverAIRequest({ book, onFieldChange }) {
                             role: "system",
                             content: `너는 도서 요약 전문가야.
                             제공된 책의 전체 내용을 바탕으로, 독자의 호기심을 자극할 수 있도록 줄거리를 요약해.
-                            
+
                             [필수 조건]:
-                            1. 절대 결말이나 중요한 반전(스포일러)을 포함하지 마라. 
+                            1. 절대 결말이나 중요한 반전(스포일러)을 포함하지 마라.
                             2. 책의 초중반부 설정과 호기심을 자극하는 분위기 위주로 작성해라.
                             3. 핵심 키워드를 포함하여 딱 150자 내외의 짧은 분량으로 요약해라.`
                         },
@@ -70,14 +93,23 @@ function BookCoverAIRequest({ book, onFieldChange }) {
                 })
             });
 
-            if (!summaryRes.ok) throw new Error('OpenAI 요약 요청 실패');
+            // 상태 코드별 분기 (401: API Key 확인 유도, 429: 잠시 후 재시도, 그 외: 일반 실패)
+            if (!summaryRes.ok) {
+                alert(buildHttpErrorMessage(summaryRes.status, '도서 요약'));
+                return;
+            }
 
-            // cleanSummary 추출 -> 표지 생성 시 요약본 넘기기
-            const summaryData = await summaryRes.json();
+            // 응답 JSON 파싱 (예상과 다른 형식이면 안내 후 종료)
+            const summaryData = await safeParseJson(summaryRes, '도서 요약');
+            if (!summaryData) return;
+
             const cleanSummary = summaryData.choices?.[0]?.message?.content;
+            if (!cleanSummary) {
+                alert('[도서 요약] 응답에서 요약 내용을 찾지 못했습니다.\n잠시 후 다시 시도해주세요.');
+                return;
+            }
 
-
-            // 2. OpenAI 이미지 생성 요청
+            // ── 2. 표지 이미지 생성 ──────────────────────────────
             const res = await fetch(OPENAI_IMAGE_API_URL, {
                 method: 'POST',
                 headers: {
@@ -94,16 +126,22 @@ function BookCoverAIRequest({ book, onFieldChange }) {
                 }),
             });
 
-            if (!res.ok) throw new Error('OpenAI 요청 실패');
+            if (!res.ok) {
+                alert(buildHttpErrorMessage(res.status, '표지 이미지 생성'));
+                return;
+            }
 
-            // 2. OpenAI 응답 파싱 후 b64_json 추출
-            const data = await res.json();
+            const data = await safeParseJson(res, '표지 이미지 생성');
+            if (!data) return;
+
             const b64Json = data.data?.[0]?.b64_json;
+            if (!b64Json) {
+                alert('[표지 이미지 생성] 응답에서 이미지 데이터를 찾지 못했습니다.\n잠시 후 다시 시도해주세요.');
+                return;
+            }
 
-            // b64_json을 Data URL 형태로 변환
+            // b64_json을 Data URL 형태로 변환 + 화면 반영
             const imageSrc = `data:image/png;base64,${b64Json}`;
-
-            // 3. 상태 업데이트 -> 화면 반영
             onFieldChange({
                 ...book,
                 coverImageUrl: imageSrc
@@ -112,7 +150,12 @@ function BookCoverAIRequest({ book, onFieldChange }) {
 
         } catch (error) {
             console.error(error);
-            alert("에러 발생");
+            // fetch 자체가 실패한 경우 (네트워크 단절·CORS 등) → TypeError
+            if (error instanceof TypeError) {
+                alert("네트워크 오류가 발생했습니다.\n인터넷 연결 상태를 확인한 뒤 다시 시도해주세요.");
+            } else {
+                alert(`처리 중 오류가 발생했습니다.\n${error.message ?? ''}`);
+            }
         } finally {
             setLoading(false);
         }
