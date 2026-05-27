@@ -13,8 +13,8 @@ import UnavailableBackend from './components/UnavailableBackend';
 function App() {
   // 1. 상태(State) 관리
   const [books, setBooks] = useState([]); // 전체 도서 목록 상태
-  const [currentView, setCurrentView] = useState('list'); // 현재 화면 (list, add, edit, view, remove, unavailable, backendunavailable)
-  const [selectedBookId, setSelectedBookId] = useState(null); // 선택된 도서의 ID 관리
+  const [currentView, setCurrentView] = useState('edit'); // 현재 화면 (list, add, edit, view, remove, unavailable, backendunavailable)
+  const [selectedBookId, setSelectedBookId] = useState(999); // 선택된 도서의 ID 관리
   const [prevPage, setPrevPage] = useState('list'); // 이전 페이지(화면) 저장
 
   // json-server 연동을 위한 베이스 URL
@@ -157,7 +157,7 @@ function App() {
         if (!currentBook)
           return (
             <>
-              <h1><center>다책 정보를 찾을 수 없습니. 도서 리스트로 돌아가십시오</center></h1>
+              <h1><center>도서 정보를 찾을 수 없습니다<br />도서 리스트로 돌아가십시오</center></h1>
               {/*예쁜 코드로 수정 필요 & 오류방지용 간단 작성*/}
             </>
           );
