@@ -9,11 +9,30 @@ function BookCoverAIRequest({ book, onFieldChange }) {
     const [selectedQuality, setSelectedQuality] = useState("medium");
     const [loading, setLoading] = useState(false);
 
+    const createBookCoverPrompt = (title, content) => {
+        // 책 내용 및 설명 150자 제한
+        // "an inspiring book layout" -> 내용이 없을 경우에도 대략적인 표지 생성 위한 임시 값
+        const summarizedContent = content ? content.slice(0, 150) : "an inspiring book layout";
+
+        return `A professional front book cover design artwork.
+        The book title is "${title}".
+        The illustration should represent the following story and mood: ${summarizedContent}.
+        
+        [Style instructions]: Modern minimalist graphic design, award-winning book illustration, artistic, high resolution, clean layout.
+        [Crucial]: DO NOT write any text or letters on the cover except the title.`;
+    }
+
     async function handleGenerateCover() {
         if (!userApiKey) {
             alert("API Key를 입력해주세요.");
             return;
         }
+
+        const isConfirmed = window.confirm(
+            "AI 표지 생성 비용 안내\n\n이미지를 생성할 때마다 API Key의 비용이 실제로 차감됩니다.\n정말 생성을 진행하시겠습니까?"
+        );
+
+        if (!isConfirmed) return;
 
         setLoading(true);
         try {
@@ -26,7 +45,7 @@ function BookCoverAIRequest({ book, onFieldChange }) {
                 },
                 body: JSON.stringify({
                     model: selectedModel,
-                    prompt: `${book.title}: ${book.content}`,
+                    prompt: createBookCoverPrompt(book.title, book.content),
                     n: 1,
                     size: '1024x1536',
                     quality: selectedQuality,
