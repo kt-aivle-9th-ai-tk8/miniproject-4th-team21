@@ -8,11 +8,12 @@ import EditBook from './components/EditBook';
 import ViewBook from './components/ViewBook';
 import RemoveBook from './components/RemoveBook';
 import UnavailableBook from './components/UnavailableBook';
+import UnavailableBackend from './components/UnavailableBackend';
 
 function App() {
   // 1. 상태(State) 관리
   const [books, setBooks] = useState([]); // 전체 도서 목록 상태
-  const [currentView, setCurrentView] = useState('list'); // 현재 화면 (list, add, edit, view, remove, unavailable)
+  const [currentView, setCurrentView] = useState('list'); // 현재 화면 (list, add, edit, view, remove, unavailable, backendunavailable)
   const [selectedBookId, setSelectedBookId] = useState(null); // 선택된 도서의 ID 관리
   const [prevPage, setPrevPage] = useState('list'); // 이전 페이지(화면) 저장
 
@@ -32,6 +33,7 @@ function App() {
         setBooks(data);
       }
     } catch (error) {
+      setCurrentView('backendunavailable');
       console.error("도서 목록을 불러오는 중 오류 발생:", error);
     }
   };
@@ -184,6 +186,10 @@ function App() {
         return (
           <UnavailableBook />
         );
+      case 'backendunavailable':
+        return (
+          <UnavailableBackend />
+        );
       default:
         return <BookList books={books} onTransform={handleTransform} />;
     }
@@ -192,7 +198,9 @@ function App() {
   return (
     <div className="app-container">
       {/* 공통 헤더 컴포넌트 */}
-      <Header onTransform={handleTransform} currentPage={currentView} />
+      {currentView !== 'backendunavailable' && ( // 백엔드 서비스 불가 화면에서는 헤더 숨김 --> 메뉴변경 방지
+        <Header onTransform={handleTransform} currentPage={currentView} />
+      )}
       
       {/* 메인 콘텐츠 영역 (조건부 렌더링) */}
       <main className="main-content">
