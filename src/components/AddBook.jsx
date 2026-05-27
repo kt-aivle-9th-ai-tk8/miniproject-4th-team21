@@ -10,6 +10,7 @@ function AddBook({ onTransform, onSubmit }) {
         title: "",
         author: "",
         content: "",
+        category: "",
         coverImageUrl: "",
         createdAt: null,
         updatedAt: null
@@ -23,6 +24,10 @@ function AddBook({ onTransform, onSubmit }) {
         e.preventDefault();
         if (!newBook.title || !newBook.author) {
             alert("제목과 저자는 필수 입력 사항입니다.");
+            return;
+        }
+        if (!newBook.category) {
+            alert("카테고리는 필수 선택 사항입니다.");
             return;
         }
         onSubmit(newBook);

@@ -10,6 +10,7 @@ function EditBook({ onTransform, onRevise, book, prevPage }) {
         title: book.title,
         author: book.author,
         content: book.content,
+        category: book.category,
         coverImageUrl: book.coverImageUrl,
         createdAt: book.createdAt,
         updatedAt: book.updatedAt
@@ -23,6 +24,10 @@ function EditBook({ onTransform, onRevise, book, prevPage }) {
         e.preventDefault();
         if (!newBook.title || !newBook.author) {
             alert("제목과 저자는 필수 입력 사항입니다.");
+            return;
+        }
+        if (!newBook.category) {
+            alert("카테고리는 필수 선택 사항입니다.");
             return;
         }
         onRevise(book.id, newBook);
