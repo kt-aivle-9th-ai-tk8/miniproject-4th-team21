@@ -20,21 +20,42 @@ function App() {
   // json-server 연동을 위한 베이스 URL
   const API_URL = 'http://localhost:3000/books';
 
+  const runBookRequest = async (request, { errorMessage, onSuccess, onError } = {}) => {
+    try {
+      const response = await request();
+
+      if (!response.ok) { // 정상응답(200번대) 여부 검증
+        return null;
+      }
+
+      const data = response.status === 204 ? null : await response.json(); // 204 No Content인 경우 JSON 파싱 생략
+      onSuccess?.(data);
+      return data;
+    } catch (error) {
+      onError?.(error);
+      if (errorMessage) {
+        console.error(errorMessage, error);
+      }
+      return null;
+    }
+  };
+
   // 2. 초기 데이터 로드 (fetch + GET)
   useEffect(() => {
     fetchBooks();
   }, []);
 
   const fetchBooks = async () => {
-    try {
-      const response = await fetch(API_URL);
-      if (response.ok) {
-        const data = await response.json();
-        setBooks(data);
+    const booksData = await runBookRequest(
+      () => fetch(API_URL),
+      {
+        errorMessage: '도서 목록을 불러오는 중 오류 발생:',
+        onError: () => setCurrentView('backendunavailable'),
       }
-    } catch (error) {
-      setCurrentView('backendunavailable');
-      console.error("도서 목록을 불러오는 중 오류 발생:", error);
+    );
+
+    if (booksData) {
+      setBooks(booksData);
     }
   };
 
@@ -49,70 +70,66 @@ function App() {
   
   // 신규 도서 등록 (onSubmit)
   const handleSubmit = async (bookObject) => {
-    try {
-      const currentTime = new Date().toISOString();
-      const bookWithTimestamps = {
-        ...bookObject,
-        createdAt: currentTime,
-        updatedAt: currentTime
-      };
-      
-      const response = await fetch(API_URL, {
+    const currentTime = new Date().toISOString();
+    const bookWithTimestamps = {
+      ...bookObject,
+      createdAt: currentTime,
+      updatedAt: currentTime
+    };
+
+    const newBook = await runBookRequest(
+      () => fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookWithTimestamps),
-      });
+      }),
+      { errorMessage: '도서 등록 실패:' }
+    );
 
-      if (response.ok) {
-        const newBook = await response.json();
-        setBooks(prevBooks => [...prevBooks, newBook]); // await fetchBooks(); // 목록 갱신
-        setCurrentView('view'); // 등록 후 리스트로 이동
-        setSelectedBookId(newBook.id);
-      }
-    } catch (error) {
-      console.error("도서 등록 실패:", error);
+    if (newBook) {
+      setBooks(prevBooks => [...prevBooks, newBook]); // await fetchBooks(); // 목록 갱신
+      setCurrentView('view'); // 등록 후 리스트로 이동
+      setSelectedBookId(newBook.id);
     }
   };
 
   // 기존 도서 수정 (onRevise)
   const handleRevise = async (bookId, bookObject) => {
-    try {
-      const currentTime = new Date().toISOString();
-      const bookWithTimestamps = {
-        ...bookObject,
-        updatedAt: currentTime
-      };
+    const currentTime = new Date().toISOString();
+    const bookWithTimestamps = {
+      ...bookObject,
+      updatedAt: currentTime
+    };
 
-      const response = await fetch(`${API_URL}/${bookId}`, {
+    const revisedBook = await runBookRequest(
+      () => fetch(`${API_URL}/${bookId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookWithTimestamps),
-      });
-      
-      if (response.ok) {
-        const revisedBook = await response.json();
-        setBooks(prevBooks => prevBooks.map(book => book.id === bookId ? revisedBook : book)); // await fetchBooks(); // 목록 갱신
-        setCurrentView('view'); // 수정 후 리스트로 이동
-        setSelectedBookId(revisedBook.id);
-      }
-    } catch (error) {
-      console.error("도서 수정 실패:", error);
+      }),
+      { errorMessage: '도서 수정 실패:' }
+    );
+
+    if (revisedBook) {
+      setBooks(prevBooks => prevBooks.map(book => book.id === bookId ? revisedBook : book)); // await fetchBooks(); // 목록 갱신
+      setCurrentView('view'); // 수정 후 리스트로 이동
+      setSelectedBookId(revisedBook.id);
     }
   };
 
   // 특정 도서 삭제 (onDelete)
   const handleDelete = async (bookId) => {
-    try {
-      const response = await fetch(`${API_URL}/${bookId}`, {
+    const deleted = await runBookRequest(
+      () => fetch(`${API_URL}/${bookId}`, {
         method: 'DELETE',
-      });
-      if (response.ok) {
-        // 삭제 시 목록에서도 즉시 반영 (상태 업데이트)
-        setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId));
-        setCurrentView('list'); // 삭제 후 리스트로 이동
-      }
-    } catch (error) {
-      console.error("도서 삭제 실패:", error);
+      }),
+      { errorMessage: '도서 삭제 실패:' }
+    );
+
+    if (deleted !== null) {
+      // 삭제 시 목록에서도 즉시 반영 (상태 업데이트)
+      setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId));
+      setCurrentView('list'); // 삭제 후 리스트로 이동
     }
   };
 
