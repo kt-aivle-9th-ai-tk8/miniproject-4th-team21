@@ -1,6 +1,15 @@
 const TITLE_MAX_LENGTH = 50;
 const AUTHOR_MAX_LENGTH = 30;
 const CONTENT_MAX_LENGTH = 500;
+const CATEGORY_OPTIONS = [
+    '소설',
+    '시/에세이',
+    '인문',
+    '사회/경제',
+    '공학/기술',
+    '컴퓨터/IT',
+    '기타'
+];
 
 function BookForm({ book, onFieldChange }) {
     const handleChange = (field) => (e) => {
@@ -57,6 +66,23 @@ function BookForm({ book, onFieldChange }) {
                         required
                     />
                 </div>
+            </div>
+
+            <div className="form-group">
+                <label className="form-label">카테고리<span className="required">*</span></label>
+                <select
+                    className="form-input"
+                    value={book.category ?? ''}
+                    onChange={handleChange('category')}
+                    required
+                >
+                    <option value="">카테고리를 선택하세요</option>
+                    {CATEGORY_OPTIONS.map((category) => (
+                        <option key={category} value={category}>
+                            {category}
+                        </option>
+                    ))}
+                </select>
             </div>
 
             <div className="form-group">
