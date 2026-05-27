@@ -1,7 +1,10 @@
 export default function ViewBook({ book, onTransform }) {
-  if (!book) return null;
+  if (!book) {
+    onTransform('unavailable', null);
+    return null;
+  }
 
-   //날짜 (BookItem.jsx 에서 복사) 
+  // 날짜 (BookItem.jsx에서 복사)
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
     const d = new Date(dateStr);
