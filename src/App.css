@@ -171,6 +171,7 @@
   gap: 20px;
 }
 
+
 /* 빈 목록일 때 <ul.book-list> 안의 <p>가 그리드 전체 폭을 차지하도록 */
 .book-list > p {
   grid-column: 1 / -1;
@@ -199,6 +200,96 @@
 @media (max-width: 480px) {
   .book-list {
     grid-template-columns: 1fr;
+  }
+}
+
+/* ==========================================================================
+   [개선] BOOK LIST 필터 / 검색 바 스타일
+   ========================================================================== */
+
+.book-filters {
+  max-width: 1200px; 
+  margin: 0 auto 32px auto;
+  padding: 16px 24px;
+  background-color: var(--surface);
+  border-radius: var(--radius); 
+  box-shadow: var(--shadow-md); 
+  border: 1px solid #e2e8f0;
+  
+  display: flex;
+  gap: 12px; 
+  align-items: center;
+}
+
+.filter-select {
+  padding: 12px 36px 12px 16px; 
+  font-size: 14px;
+  font-weight: 500;
+  color: #334155;
+  background-color: #f8fafc; 
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm); 
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19.5 8.25l-7.5 7.5-7.5-7.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 14px;
+  
+  min-width: 160px; 
+}
+
+.filter-select:hover {
+  background-color: #f1f5f9;
+  border-color: #94a3b8;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: var(--primary); 
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15);
+}
+
+.filter-input {
+  flex: 1; 
+  padding: 12px 16px;
+  font-size: 14px;
+  color: #0f172a;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  transition: all 0.2s ease;
+}
+
+.filter-input:hover {
+  border-color: #94a3b8;
+}
+
+.filter-input:focus {
+  outline: none;
+  border-color: var(--primary);
+  background-color: #ffffff;
+  box-shadow: 0 0 0 3px rgba(21, 101, 192, 0.15);
+}
+
+.filter-input::placeholder {
+  color: var(--text-light);
+}
+
+/* ===== 반응형 모바일 대응  ===== */
+@media (max-width: 768px) {
+  .book-filters {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  
+  .filter-select {
+    width: 100%;
   }
 }
 
@@ -308,12 +399,11 @@
   padding: 0 20px;
   box-sizing: border-box;
 }
-/* 상단 뒤로가기 버튼 영역 */
+
 .viewbook-header-bar {
   margin-bottom: 20px;
 }
 
-/* 페이지 메인 제목 */
 .viewbook-page-title {
   font-size: 24px;
   color: #1e293b;
@@ -321,7 +411,6 @@
   font-weight: 700;
 }
 
-/* 사진과 내용을 감싸는 메인 카드 (기존 도서 카드 톤 유지하며 프리미엄화) */
 .viewbook-card {
   background-color: var(--surface);
   border-radius: var(--radius);
@@ -333,44 +422,44 @@
   align-items: start;
 }
 
-/* 좌측 도서 표지 wrapper 및 양장본 3D 입체 효과 추가 */
 .viewbook-cover-wrapper {
   display: flex;
   justify-content: center;
   align-items: center;
   background-color: #f8fafc;
   border-radius: var(--radius-sm);
-  border: 1px dashed var(--border);
-  aspect-ratio: 3 / 4;
-  overflow: hidden;
+  border: 1px solid var(--border);
+  padding: 16px; 
+  box-sizing: border-box;
   position: relative;
+  max-height: 400px;
 }
 
 .viewbook-cover-wrapper img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  border-radius: 4px var(--radius-sm) var(--radius-sm) 4px;
+  height: auto;
+  max-height: 100%;
+  object-fit: contain;
+  border-radius: var(--radius-sm);
+  
   /* 실제 하드커버 서적의 책등 음영(Spine Shadow)을 주는 고급 필터 효과 */
   box-shadow: 
     -4px 4px 15px rgba(0, 0, 0, 0.2),
     inset 10px 0 15px rgba(0, 0, 0, 0.12);
 }
 
-/* 이미지 없을 때 텍스트 스타일 */
 .no-cover-text {
   color: var(--text-light);
   font-size: 14px;
   font-weight: 500;
 }
 
-/* 우측 정보 묶음 레이아웃 */
 .viewbook-info {
   display: flex;
   flex-direction: column;
+  gap: 12px;
 }
 
-/* 도서 제목 타이포그래피 */
 .viewbook-title {
   font-size: 28px;
   font-weight: 700;
@@ -379,14 +468,12 @@
   line-height: 1.3;
 }
 
-/* 저자 스타일 */
 .viewbook-author {
   font-size: 16px;
   color: var(--text-sub);
   margin: 0 0 20px 0;
 }
 
-/* 등록일, 수정일 그리드 배치 */
 .viewbook-details-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -409,7 +496,6 @@
   margin-right: 6px;
 }
 
-/* 도서 소개 소제목 */
 .viewbook-content-title {
   font-size: 16px;
   color: var(--text-light);
@@ -418,7 +504,6 @@
   margin: 0 0 10px 0;
 }
 
-/* 도서 소개 본문 (눈이 편안한 아카이브 미색 서재 지면 연출) */
 .viewbook-content-body {
   background-color: #fcfbf7; /* 부드러운 아이보리 톤 속지 */
   border-left: 4px solid var(--primary);
@@ -432,13 +517,13 @@
   min-height: 120px;
 }
 
-/* 하단 버튼 액션 그룹 배치 */
 .viewbook-actions {
   display: flex;
-  gap: 12px;
-  justify-content: flex-end; /* 버튼 우측 정렬 */
+  gap: 16px;
+  justify-content: flex-start; 
   border-top: 1px solid #f1f5f9;
-  padding-top: 20px;
+  padding-top: 24px;
+  margin-top: 12px;
 }
 
 /* ===== 반응형 모바일 대응 추가 디테일 ===== */
@@ -457,7 +542,7 @@
   }
 }
 
-/**/
+/*====*/
 
 .back-link {
   display: inline-flex;
@@ -662,6 +747,15 @@
   max-width: 800px;
   margin: 0 auto;
   width: 100%;
+}
+
+.form-page-container h1{
+  font-size: 24px;         
+  color: #1e293b;      
+  font-weight: 700;     
+  margin-top: 0;
+  margin-bottom: 24px;   
+  letter-spacing: -0.02em;
 }
 
 .form-page-title {
