@@ -13,15 +13,15 @@ function BookCoverAIRequest({ book, onFieldChange }) {
     const createBookCoverPrompt = (title, content) => {
         return `A full-frame, 2D flat graphic vector and illustration design for a front book cover.
         The book title is "${title}".
-    The core illustration should represent the following story and mood, completely filling the entire canvas up to the edges: ${content}.
+        The core illustration should represent the following story and mood, completely filling the entire canvas up to the edges: ${content}.
 
-    [Layout & Composition instructions]: 
-    - Full-bleed design: The artistic illustration must completely fill the entire background space with NO borders, NO mockups, NO 3D book shapes, and NO realistic textures.
-    - Flat 2D front-view aspect only. It must look like a digital graphic design file, not a photo of a physical book.
-    - The title "${title}" must be typed cleanly on the cover using large, highly legible, well-placed typography that harmonizes with the background illustration.
+        [Layout & Composition instructions]: 
+        - Full-bleed design: The artistic illustration must completely fill the entire background space with NO borders, NO mockups, NO 3D book shapes, and NO realistic textures.
+        - Flat 2D front-view aspect only. It must look like a digital graphic design file, not a photo of a physical book.
+        - The title "${title}" must be typed cleanly on the cover using medium, highly legible, well-placed typography that harmonizes with the background illustration.
 
-    [Style instructions]: Modern minimalist graphic design, award-winning book illustration, artistic, high resolution, clean layout.
-    [Crucial]: DO NOT include any 3D book spine, pages, folds, shadows, or background scenery behind the book. DO NOT write any other text except the title.`;
+        [Style instructions]: Modern minimalist graphic design, award-winning book illustration, artistic, high resolution, clean layout.
+        [Crucial]: DO NOT include any 3D book spine, pages, folds, shadows, or background scenery behind the book. DO NOT write any other text except the title.`;
     }
 
     async function handleGenerateCover() {
