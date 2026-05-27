@@ -137,10 +137,10 @@ return (
         <section className="ai-cover-card">
             {/* 제목 및 설명 */}
             <div className="ai-cover-header">
-                <h3>✨ AI 대체 표지 생성</h3>
+                <h3>✨ AI 표지 생성기</h3>
                 <p className="ai-cover-description">
-                    기존 표지 이미지가 손상되었거나 저작권 문제가 있는 경우, 도서의 메타데이터(제목, 저자, 장르)를 기반으로 
-                    인공지능을 활용하여 새로운 대체 표지를 생성할 수 있습니다. 생성 기능을 사용하려면 유효한 API 키가 필요합니다.
+                    작성한 도서의 제목과 내용을 바탕으로 인공지능이 새로운 표지를 생성합니다.
+                    생성 기능을 사용하려면 유효한 API 키가 필요합니다.
                 </p>
             </div>
 
