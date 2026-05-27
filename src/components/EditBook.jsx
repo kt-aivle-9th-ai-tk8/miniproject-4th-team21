@@ -4,6 +4,11 @@ import BookCoverAIRequest from "./BookCoverAIRequest";
 
 // App.jsx 하위 부모 컴포넌트 - 책 내용 수정 페이지
 function EditBook({ onTransform, onRevise, book, prevPage }) {
+    // book 데이터 없을 때
+    if (book === null || book === undefined) {
+        onTransform('unavailable');
+        return null;
+    }
 
     const [newBook, setNewBook] = useState({
         id: book.id,
