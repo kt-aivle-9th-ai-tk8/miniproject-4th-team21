@@ -1,6 +1,7 @@
 import { useState } from "react";
 
 function BookCoverAIRequest({ book, onFieldChange }) {
+    const OPENAPI_SUMMARY_API_URL = "https://api.openai.com/v1/chat/completions";
     const OPENAI_IMAGE_API_URL = "https://api.openai.com/v1/images/generations";
     
     // UI 입력값 상태 관리
@@ -10,21 +11,27 @@ function BookCoverAIRequest({ book, onFieldChange }) {
     const [loading, setLoading] = useState(false);
 
     const createBookCoverPrompt = (title, content) => {
-        // 책 내용 및 설명 150자 제한
-        // "an inspiring book layout" -> 내용이 없을 경우에도 대략적인 표지 생성 위한 임시 값
-        const summarizedContent = content ? content.slice(0, 150) : "an inspiring book layout";
-
-        return `A professional front book cover design artwork.
+        return `A full-frame, 2D flat graphic vector and illustration design for a front book cover.
         The book title is "${title}".
-        The illustration should represent the following story and mood: ${summarizedContent}.
-        
-        [Style instructions]: Modern minimalist graphic design, award-winning book illustration, artistic, high resolution, clean layout.
-        [Crucial]: DO NOT write any text or letters on the cover except the title.`;
+    The core illustration should represent the following story and mood, completely filling the entire canvas up to the edges: ${content}.
+
+    [Layout & Composition instructions]: 
+    - Full-bleed design: The artistic illustration must completely fill the entire background space with NO borders, NO mockups, NO 3D book shapes, and NO realistic textures.
+    - Flat 2D front-view aspect only. It must look like a digital graphic design file, not a photo of a physical book.
+    - The title "${title}" must be typed cleanly on the cover using large, highly legible, well-placed typography that harmonizes with the background illustration.
+
+    [Style instructions]: Modern minimalist graphic design, award-winning book illustration, artistic, high resolution, clean layout.
+    [Crucial]: DO NOT include any 3D book spine, pages, folds, shadows, or background scenery behind the book. DO NOT write any other text except the title.`;
     }
 
     async function handleGenerateCover() {
         if (!userApiKey) {
             alert("API Key를 입력해주세요.");
+            return;
+        }
+
+        if (!book.content || !book.content.trim()) {
+            alert("책 내용이 비어있어 요약 및 표지를 생성할 수 없습니다. \n내용을 먼저 입력해 주세요.");
             return;
         }
 
@@ -36,7 +43,41 @@ function BookCoverAIRequest({ book, onFieldChange }) {
 
         setLoading(true);
         try {
-            // 1. OpenAI 이미지 생성 요청
+            const summaryRes = await fetch(OPENAPI_SUMMARY_API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${userApiKey}`,
+                },
+                body: JSON.stringify({
+                    model: "gpt-4o-mini",
+                    messages: [
+                        {
+                            role: "system",
+                            content: `너는 도서 요약 전문가야.
+                            제공된 책의 전체 내용을 바탕으로, 독자의 호기심을 자극할 수 있도록 줄거리를 요약해.
+                            
+                            [필수 조건]:
+                            1. 절대 결말이나 중요한 반전(스포일러)을 포함하지 마라. 
+                            2. 책의 초중반부 설정과 호기심을 자극하는 분위기 위주로 작성해라.
+                            3. 핵심 키워드를 포함하여 딱 150자 내외의 짧은 분량으로 요약해라.`
+                        },
+                        {
+                            role: "user",
+                            content: book.content
+                        }
+                    ], max_tokens: 300 // 말 길어지는 거 차단
+                })
+            });
+
+            if (!summaryRes.ok) throw new Error('OpenAI 요약 요청 실패');
+
+            // cleanSummary 추출 -> 표지 생성 시 요약본 넘기기
+            const summaryData = await summaryRes.json();
+            const cleanSummary = summaryData.choices?.[0]?.message?.content;
+
+
+            // 2. OpenAI 이미지 생성 요청
             const res = await fetch(OPENAI_IMAGE_API_URL, {
                 method: 'POST',
                 headers: {
@@ -45,7 +86,7 @@ function BookCoverAIRequest({ book, onFieldChange }) {
                 },
                 body: JSON.stringify({
                     model: selectedModel,
-                    prompt: createBookCoverPrompt(book.title, book.content),
+                    prompt: createBookCoverPrompt(book.title, cleanSummary),
                     n: 1,
                     size: '1024x1536',
                     quality: selectedQuality,
