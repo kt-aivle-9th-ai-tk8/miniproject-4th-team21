@@ -1,7 +1,7 @@
 export default function ViewBook({ book, onTransform }) {
   if (!book) return null;
 
-  // 날짜 생성 (BookItem.jsx에서 복사)
+   //날짜 (BookItem.jsx 에서 복사) 
   const formatDate = (dateStr) => {
     if (!dateStr) return '-';
     const d = new Date(dateStr);
@@ -14,15 +14,15 @@ export default function ViewBook({ book, onTransform }) {
 
   return (
     <div>
-      {/* 1. 뒤로가기 */}
+      {/* 뒤로가기 */}
       <div>
         <button onClick={() => onTransform('list')}>목록으로 돌아가기</button>
       </div>
 
-      {/* 2. 제목 */}
+      {/* 제목 */}
       <h1>도서 상세 정보</h1>
 
-      {/* 3. 사진과 상세 정보 */}
+      {/* 사진과 내용 */}
       <div>
         <div>
           {book.coverImageUrl ? (
@@ -35,7 +35,11 @@ export default function ViewBook({ book, onTransform }) {
         <div>
           <h2>{book.title}</h2>
           <p>{book.author} 저</p>
-          <p>등록일: {formatDate(book.createdAt)}</p>
+          
+          <div>
+            <p>등록일: {formatDate(book.createdAt)}</p>
+            <p>수정일: {formatDate(book.updatedAt)}</p>
+          </div>
           
           <h3>도서 소개</h3>
           <p>{book.content}</p>
