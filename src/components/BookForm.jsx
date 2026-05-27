@@ -1,15 +1,8 @@
+import { CATEGORY_OPTIONS } from '../constants/categoryOptions';
+
 const TITLE_MAX_LENGTH = 50;
 const AUTHOR_MAX_LENGTH = 30;
 const CONTENT_MAX_LENGTH = 500;
-const CATEGORY_OPTIONS = [
-    '소설',
-    '시/에세이',
-    '인문',
-    '사회/경제',
-    '공학/기술',
-    '컴퓨터/IT',
-    '기타'
-];
 
 function BookForm({ book, onFieldChange }) {
     const handleChange = (field) => (e) => {

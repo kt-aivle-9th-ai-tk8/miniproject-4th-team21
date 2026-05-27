@@ -1,6 +1,35 @@
+import { useState } from 'react';
 import BookItem from './BookItem';
+import { CATEGORY_OPTIONS } from '../constants/categoryOptions';
+
+const SEARCH_FIELDS = [
+    { value: 'all', label: '통합검색' },
+    { value: 'title', label: '도서명' },
+    { value: 'author', label: '저자명' },
+];
 
 function BookList({books, onTransform}) {
+    const [selectedCategory, setSelectedCategory] = useState('');
+    const [searchField, setSearchField] = useState('all');
+    const [searchKeyword, setSearchKeyword] = useState('');
+
+    // 필터링: 카테고리 + (선택된 필드에 대한 키워드 부분일치)
+    const keyword = searchKeyword.trim().toLowerCase();
+    const filteredBooks = books.filter(b => {
+        const matchCategory = !selectedCategory || b.category === selectedCategory;
+
+        if (!keyword) return matchCategory;
+
+        const title = (b.title ?? '').toLowerCase();
+        const author = (b.author ?? '').toLowerCase();
+        const matchKeyword =
+            searchField === 'title'  ? title.includes(keyword)  :
+            searchField === 'author' ? author.includes(keyword) :
+            /* all */                  title.includes(keyword) || author.includes(keyword);
+
+        return matchCategory && matchKeyword;
+    });
+
     return (
         <div className='list-container'>
             <header className='list-header'>
@@ -10,14 +39,48 @@ function BookList({books, onTransform}) {
                 </div>
             </header>
 
+            <div className="book-filters">
+                <select
+                    className="filter-select"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                >
+                    <option value="">전체 카테고리</option>
+                    {CATEGORY_OPTIONS.map(cat => (
+                        <option key={cat} value={cat}>{cat}</option>
+                    ))}
+                </select>
+
+                <select
+                    className="filter-select"
+                    value={searchField}
+                    onChange={(e) => setSearchField(e.target.value)}
+                >
+                    {SEARCH_FIELDS.map(f => (
+                        <option key={f.value} value={f.value}>{f.label}</option>
+                    ))}
+                </select>
+
+                <input
+                    type="text"
+                    className="filter-input"
+                    placeholder="검색어를 입력하세요"
+                    value={searchKeyword}
+                    onChange={(e) => setSearchKeyword(e.target.value)}
+                />
+            </div>
+
             <ul className="book-list">
-                {books.length > 0 ? (
-                    books.map(b => (
+                {books.length === 0 ? (
+                    <p>등록된 도서가 없습니다.</p>
+                ) : filteredBooks.length > 0 ? (
+                    filteredBooks.map(b => (
                         <BookItem
                             key={b.id}
                             id={b.id}
                             title={b.title}
                             author={b.author}
+                            category={b.category}
                             coverImageUrl={b.coverImageUrl}
                             createdAt={b.createdAt}
                             updatedAt={b.updatedAt}
@@ -25,7 +88,7 @@ function BookList({books, onTransform}) {
                         />
                     ))
                 ) : (
-                    <p>등록된 도서가 없습니다.</p>
+                    <p>조건에 맞는 도서가 없습니다.</p>
                 )}
             </ul>
         </div>
