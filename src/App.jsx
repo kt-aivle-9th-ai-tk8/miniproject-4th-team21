@@ -18,7 +18,7 @@ function App() {
   const [prevPage, setPrevPage] = useState('list'); // 이전 페이지(화면) 저장
 
   // json-server 연동을 위한 베이스 URL
-  const API_URL = 'http://localhost:3000/books';
+  const API_URL = 'http://localhost:8080/books';
 
   const runBookRequest = async (request, { errorMessage, onSuccess, onError } = {}) => {
     try {
