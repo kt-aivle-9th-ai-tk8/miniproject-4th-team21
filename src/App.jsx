@@ -13,11 +13,11 @@ import UnavailableBackend from './components/UnavailableBackend';
 function App() {
   // 1. 상태(State) 관리
   const [books, setBooks] = useState([]); // 전체 도서 목록 상태
-  const [currentView, setCurrentView] = useState('edit'); // 현재 화면 (list, add, edit, view, remove, unavailable, backendunavailable)
+  const [currentView, setCurrentView] = useState('list');
   const [selectedBookId, setSelectedBookId] = useState(999); // 선택된 도서의 ID 관리
   const [prevPage, setPrevPage] = useState('list'); // 이전 페이지(화면) 저장
 
-  // json-server 연동을 위한 베이스 URL
+  // 백엔드 데이터베이스 연결 주소
   const API_URL = 'http://localhost:8080/books';
 
   const runBookRequest = async (request, { errorMessage, onSuccess, onError } = {}) => {
@@ -42,12 +42,21 @@ function App() {
 
   // 2. 초기 데이터 로드 (fetch + GET)
   useEffect(() => {
-    fetchBooks();
+    fetchBooks(); // 처음 켰을 때는 빈 조건으로 전체 목록 조회
   }, []);
 
-  const fetchBooks = async () => {
+  const fetchBooks = async (filterData = null) => {
+    let url = API_URL;
+
+  
+    if (filterData) {
+      const { category, searchField, keyword } = filterData;
+      // 예: http://localhost:8080/books?category=소설&searchField=title&keyword=자바
+      url = `${API_URL}?category=${encodeURIComponent(category)}&searchField=${encodeURIComponent(searchField)}&keyword=${encodeURIComponent(keyword)}`;
+    }
+
     const booksData = await runBookRequest(
-      () => fetch(API_URL),
+      () => fetch(url),
       {
         errorMessage: '도서 목록을 불러오는 중 오류 발생:',
         onError: () => setCurrentView('backendunavailable'),
@@ -68,7 +77,7 @@ function App() {
 
   // 4. CRUD 비즈니스 로직 핸들러
   
-  // 신규 도서 등록 (onSubmit)
+  // 신규 도서 등록 (onSubmit) post
   const handleSubmit = async (bookObject) => {
     const currentTime = new Date().toISOString();
     const bookWithTimestamps = {
@@ -87,13 +96,13 @@ function App() {
     );
 
     if (newBook) {
-      setBooks(prevBooks => [...prevBooks, newBook]); // await fetchBooks(); // 목록 갱신
-      setCurrentView('view'); // 등록 후 리스트로 이동
+      setBooks(prevBooks => [...prevBooks, newBook]); 
+      setCurrentView('view'); 
       setSelectedBookId(newBook.id);
     }
   };
 
-  // 기존 도서 수정 (onRevise)
+  // 기존 도서 수정 (onRevise) update(patch)
   const handleRevise = async (bookId, bookObject) => {
     const currentTime = new Date().toISOString();
     const bookWithTimestamps = {
@@ -103,7 +112,7 @@ function App() {
 
     const revisedBook = await runBookRequest(
       () => fetch(`${API_URL}/${bookId}`, {
-        method: 'PATCH',
+        method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(bookWithTimestamps),
       }),
@@ -111,13 +120,13 @@ function App() {
     );
 
     if (revisedBook) {
-      setBooks(prevBooks => prevBooks.map(book => book.id === bookId ? revisedBook : book)); // await fetchBooks(); // 목록 갱신
-      setCurrentView('view'); // 수정 후 리스트로 이동
+      setBooks(prevBooks => prevBooks.map(book => book.id === bookId ? revisedBook : book)); 
+      setCurrentView('view'); 
       setSelectedBookId(revisedBook.id);
     }
   };
 
-  // 특정 도서 삭제 (onDelete)
+  // 특정 도서 삭제 (onDelete) delete
   const handleDelete = async (bookId) => {
     const deleted = await runBookRequest(
       () => fetch(`${API_URL}/${bookId}`, {
@@ -127,16 +136,13 @@ function App() {
     );
 
     if (deleted !== null) {
-      // 삭제 시 목록에서도 즉시 반영 (상태 업데이트)
       setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId));
-      setCurrentView('list'); // 삭제 후 리스트로 이동
+      setCurrentView('list'); 
     }
   };
 
-  // 현재 선택된 단일 도서 객체 찾기
   const currentBook = books.find(book => book.id === selectedBookId);
 
-  // 5. 조건부 렌더링을 통한 화면 제어
   const renderView = () => {
     switch (currentView) {
       case 'list':
@@ -144,6 +150,7 @@ function App() {
           <BookList 
             books={books} 
             onTransform={handleTransform} 
+            onSearch={fetchBooks}
           />
         );
       case 'add':
@@ -187,23 +194,20 @@ function App() {
           <UnavailableBackend />
         );
       default:
-        return <BookList books={books} onTransform={handleTransform} />;
+        return <BookList books={books} onTransform={handleTransform} onSearch={fetchBooks} />;
     }
   };
 
   return (
     <div className="app-container">
-      {/* 공통 헤더 컴포넌트 */}
-      {currentView !== 'backendunavailable' && ( // 백엔드 서비스 불가 화면에서는 헤더 숨김 --> 메뉴변경 방지
+      {currentView !== 'backendunavailable' && ( 
         <Header onTransform={handleTransform} currentPage={currentView} />
       )}
       
-      {/* 메인 콘텐츠 영역 (조건부 렌더링) */}
       <main className="main-content">
         {renderView()}
       </main>
       
-      {/* 공통 푸터 컴포넌트 */}
       <Footer />
     </div>
   );

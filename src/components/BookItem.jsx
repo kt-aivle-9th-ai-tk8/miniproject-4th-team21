@@ -1,27 +1,6 @@
 import { CATEGORY_OPTIONS } from '../constants/categoryOptions';
+import '../App.css';
 
-const BOOK_CATEGORY_BADGE_CSS = `
-.book-category-badge {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 999px;
-    font-size: 12px;
-    font-weight: 600;
-    line-height: 1.4;
-    letter-spacing: 0.2px;
-    margin-bottom: 8px;
-    white-space: nowrap;
-}
-/* CATEGORIES 배열 순서(빨주노초파남보 흐름) */
-.book-category-badge--0 { background-color: #e63946; color: #ffffff; } /* 소설 */
-.book-category-badge--1 { background-color: #f4a261; color: #1a1a1a; } /* 시/에세이 */
-.book-category-badge--2 { background-color: #ffd166; color: #1a1a1a; } /* 인문 */
-.book-category-badge--3 { background-color: #2a9d8f; color: #ffffff; } /* 사회/경제 */
-.book-category-badge--4 { background-color: #1d4ed8; color: #ffffff; } /* 공학/기술 */
-.book-category-badge--5 { background-color: #5a4fcf; color: #ffffff; } /* 컴퓨터/IT */
-.book-category-badge--6 { background-color: #8d99ae; color: #ffffff; } /* 기타 */
-.book-category-badge--unknown { background-color: #cbd5e1; color: #1a1a1a; }
-`;
 
 function BookItem({ id, title, author, category, coverImageUrl, createdAt, updatedAt, onTransform }) {
     // 목록에서 삭제
@@ -51,9 +30,6 @@ function BookItem({ id, title, author, category, coverImageUrl, createdAt, updat
     <li className="book-card"
         onClick={() => onTransform('view', id)} // 버튼X, 카드 어디든 누르면 상세보기로 이동
     >
-        {/* CSS 담당자가 App.css로 옮긴 뒤 이 줄은 삭제하면 됩니다 */}
-        <style>{BOOK_CATEGORY_BADGE_CSS}</style>
-
         <div className="book-image">
             {coverImageUrl && (
             <img src={coverImageUrl} alt={title} />

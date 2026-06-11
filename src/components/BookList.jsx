@@ -13,9 +13,9 @@ function BookList({books, onTransform}) {
     const [searchField, setSearchField] = useState('all');
     const [searchKeyword, setSearchKeyword] = useState('');
 
-    // 필터링: 카테고리 + (선택된 필드에 대한 키워드 부분일치)
+    // 필터링: 카테고리 + (선택된 필드에 대한 키워드 부분일치) -> 백엔드 연동
     const keyword = searchKeyword.trim().toLowerCase();
-    const filteredBooks = books.filter(b => {
+   const filteredBooks = books.filter(b => {
         const matchCategory = !selectedCategory || b.category === selectedCategory;
 
         if (!keyword) return matchCategory;
@@ -25,10 +25,22 @@ function BookList({books, onTransform}) {
         const matchKeyword =
             searchField === 'title'  ? title.includes(keyword)  :
             searchField === 'author' ? author.includes(keyword) :
-            /* all */                  title.includes(keyword) || author.includes(keyword);
+            /*all*/                  title.includes(keyword) || author.includes(keyword);
 
         return matchCategory && matchKeyword;
     });
+    // 검색 버튼 & 엔터
+    const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        
+        // 백엔드 조회 요청
+        onSearch({
+            category: selectedCategory,
+            searchField: searchField,
+            keyword: searchKeyword.trim()
+        });
+    };
+    
 
     return (
         <div className='list-container'>
@@ -39,7 +51,7 @@ function BookList({books, onTransform}) {
                 </div>
             </header>
 
-            <div className="book-filters">
+            <form className="book-filters" onSubmit={handleSearchSubmit}>
                 <select
                     className="filter-select"
                     value={selectedCategory}
@@ -68,7 +80,9 @@ function BookList({books, onTransform}) {
                     value={searchKeyword}
                     onChange={(e) => setSearchKeyword(e.target.value)}
                 />
-            </div>
+
+                <button type="submit" className="search-button">검색</button>
+            </form>
 
             <ul className="book-list">
                 {books.length === 0 ? (
