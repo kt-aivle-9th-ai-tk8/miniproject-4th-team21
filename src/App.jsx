@@ -110,20 +110,28 @@ function App() {
       updatedAt: currentTime
     };
 
-    const revisedBook = await runBookRequest(
-      () => fetch(`${API_URL}/${bookId}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(bookWithTimestamps),
-      }),
-      { errorMessage: '도서 수정 실패:' }
-    );
+    const response = await fetch(`${API_URL}/${bookId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookWithTimestamps),
+    });
 
-    if (revisedBook) {
-      setBooks(prevBooks => prevBooks.map(book => book.id === bookId ? revisedBook : book)); 
-      setCurrentView('view'); 
-      setSelectedBookId(revisedBook.id);
+    if (response.status === 404) {
+      setCurrentView('unavailable');
+      setSelectedBookId(null);
+      return;
     }
+
+    if (!response.ok) {
+      console.error('도서 수정 실패:');
+      return;
+    }
+
+    const revisedBook = await response.json();
+
+    setBooks(prevBooks => prevBooks.map(book => book.id === bookId ? revisedBook : book)); 
+    setCurrentView('view'); 
+    setSelectedBookId(revisedBook.id);
   };
 
   // 특정 도서 삭제 (onDelete) delete
