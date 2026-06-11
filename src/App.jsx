@@ -17,7 +17,7 @@ function App() {
   const [selectedBookId, setSelectedBookId] = useState(999); // 선택된 도서의 ID 관리
   const [prevPage, setPrevPage] = useState('list'); // 이전 페이지(화면) 저장
 
-  // 백엔드 데이터베이스 연결 주소
+  // 백엔드 데이터베이스 연결 주소 -> 기존 json-server(3000) 삭제
   const API_URL = 'http://localhost:8080/books';
 
   const runBookRequest = async (request, { errorMessage, onSuccess, onError } = {}) => {
@@ -28,7 +28,7 @@ function App() {
         return null;
       }
 
-      const data = response.status === 204 ? null : await response.json(); // 204 No Content인 경우 JSON 파싱 생략
+      const data = response.status === 204 ? true : await response.json(); // 204 No Content인 경우 JSON 파싱 생략
       onSuccess?.(data);
       return data;
     } catch (error) {
