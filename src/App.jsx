@@ -28,7 +28,7 @@ function App() {
         return null;
       }
 
-      const data = response.status === 204 ? null : await response.json(); // 204 No Content인 경우 JSON 파싱 생략
+      const data = response.status === 204 ? true : await response.json(); // 204 No Content인 경우 JSON 파싱 생략
       onSuccess?.(data);
       return data;
     } catch (error) {
