@@ -50,9 +50,9 @@ function App() {
 
   
     if (filterData) {
-      const { category, searchField, keyword } = filterData;
-      // 예: http://localhost:8080/books?category=소설&searchField=title&keyword=자바
-      url = `${API_URL}?category=${encodeURIComponent(category)}&searchField=${encodeURIComponent(searchField)}&keyword=${encodeURIComponent(keyword)}`;
+      const { category, searchType, keyword } = filterData;
+      // 예: http://localhost:8080/books?category=소설&searchType=title&keyword=자바
+      url = `${API_URL}?category=${encodeURIComponent(category)}&searchType=${encodeURIComponent(searchType)}&keyword=${encodeURIComponent(keyword)}`;
     }
 
     const booksData = await runBookRequest(

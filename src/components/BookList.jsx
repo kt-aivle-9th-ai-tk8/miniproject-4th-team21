@@ -10,7 +10,7 @@ const SEARCH_FIELDS = [
 
 function BookList({books, onTransform, onSearch}) {
     const [selectedCategory, setSelectedCategory] = useState('');
-    const [searchField, setSearchField] = useState('all');
+    const [searchType, setSearchType] = useState('all');
     const [searchKeyword, setSearchKeyword] = useState('');
 
     // 필터링: 카테고리 + (선택된 필드에 대한 키워드 부분일치) -> 백엔드 연동
@@ -37,7 +37,7 @@ function BookList({books, onTransform, onSearch}) {
         // 백엔드 조회 요청
         onSearch({
             category: selectedCategory,
-            searchField: searchField,
+            searchType: searchType,
             keyword: searchKeyword.trim()
         });
     };
@@ -67,8 +67,8 @@ function BookList({books, onTransform, onSearch}) {
 
                 <select
                     className="filter-select"
-                    value={searchField}
-                    onChange={(e) => setSearchField(e.target.value)}
+                    value={searchType}
+                    onChange={(e) => setSearchType(e.target.value)}
                 >
                     {SEARCH_FIELDS.map(f => (
                         <option key={f.value} value={f.value}>{f.label}</option>
