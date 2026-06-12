@@ -75,6 +75,40 @@ function App() {
     setSelectedBookId(bookId);
   };
 
+  // AI 표지가 성공적으로 생성되었을 때 호출되는 백엔드 PATCH 콜백
+  const handleUpdateCoverApi = async (bookId, updatedBookWithImage) => {
+    const result = await runBookRequest(
+      () => fetch(`http://localhost:8080/books/${bookId}/cover`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          coverImageUrl: updatedBookWithImage.coverImageUrl 
+        }),
+      }),
+      { errorMessage: 'PATCH 요청 중 오류 발생:' }
+    );
+
+    if (!result || !result.success) {
+      setCurrentView('problemoccured');
+      
+      alert("표지를 저장하는 데 실패했습니다.");
+      return false;
+    }
+
+    const finalBook = result.data; 
+    alert("생성된 AI 표지가 최종 반영되었습니다!");
+    
+    setBooks(prevBooks => 
+      prevBooks.map(b => b.id === finalBook.id ? finalBook : b)
+    );
+    
+    setSelectedBookId(finalBook.id); 
+    setCurrentView('list'); 
+    return true;
+  };
+
   // 4. CRUD 비즈니스 로직 핸들러
   
   // 신규 도서 등록 (onSubmit) post
@@ -182,7 +216,7 @@ function App() {
           <ViewBook 
             book={currentBook} 
             onTransform={handleTransform}
-            setBooks={setBooks}
+            onUpdateCover={handleUpdateCoverApi}
           />
         );
       case 'remove':
