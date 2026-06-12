@@ -12,23 +12,6 @@ function BookList({books, onTransform, onSearch}) {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [searchType, setSearchType] = useState('all');
     const [searchKeyword, setSearchKeyword] = useState('');
-
-    // 필터링: 카테고리 + (선택된 필드에 대한 키워드 부분일치) -> 백엔드 연동
-    //const keyword = searchKeyword.trim().toLowerCase();
-   /*const filteredBooks = books.filter(b => {
-        const matchCategory = !selectedCategory || b.category === selectedCategory;
-
-        if (!keyword) return matchCategory;
-
-        const title = (b.title ?? '').toLowerCase();
-        const author = (b.author ?? '').toLowerCase();
-        const matchKeyword =
-            searchField === 'title'  ? title.includes(keyword)  :
-            searchField === 'author' ? author.includes(keyword) :
-            /*all                  title.includes(keyword) || author.includes(keyword);
-
-        return matchCategory && matchKeyword;
-    });*/
     
     // 검색 버튼 & 엔터
     const handleSearchSubmit = (e) => {
