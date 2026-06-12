@@ -182,6 +182,7 @@ function App() {
           <ViewBook 
             book={currentBook} 
             onTransform={handleTransform}
+            setBooks={setBooks}
           />
         );
       case 'remove':
@@ -202,7 +203,7 @@ function App() {
           <UnavailableBackend />
         );
       default:
-        return <BookList books={books} onTransform={handleTransform} onSearch={fetchBooks} />;
+        return <BookList books={books} onTransform={handleTransform} onSearch={handleSearchSubmit} />;
     }
   };
 

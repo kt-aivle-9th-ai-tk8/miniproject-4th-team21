@@ -30,6 +30,10 @@ function AddBook({ onTransform, onSubmit }) {
             alert("카테고리는 필수 선택 사항입니다.");
             return;
         }
+        if (!newBook.content) {
+            alert("내용은 필수 입력 사항입니다.");
+            return;
+        }
         onSubmit(newBook);
     };
 

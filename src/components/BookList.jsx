@@ -8,14 +8,14 @@ const SEARCH_FIELDS = [
     { value: 'author', label: '저자명' },
 ];
 
-function BookList({books, onTransform}) {
+function BookList({books, onTransform, onSearch}) {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [searchField, setSearchField] = useState('all');
     const [searchKeyword, setSearchKeyword] = useState('');
 
     // 필터링: 카테고리 + (선택된 필드에 대한 키워드 부분일치) -> 백엔드 연동
-    const keyword = searchKeyword.trim().toLowerCase();
-   const filteredBooks = books.filter(b => {
+    //const keyword = searchKeyword.trim().toLowerCase();
+   /*const filteredBooks = books.filter(b => {
         const matchCategory = !selectedCategory || b.category === selectedCategory;
 
         if (!keyword) return matchCategory;
@@ -25,10 +25,11 @@ function BookList({books, onTransform}) {
         const matchKeyword =
             searchField === 'title'  ? title.includes(keyword)  :
             searchField === 'author' ? author.includes(keyword) :
-            /*all*/                  title.includes(keyword) || author.includes(keyword);
+            /*all                  title.includes(keyword) || author.includes(keyword);
 
         return matchCategory && matchKeyword;
-    });
+    });*/
+    
     // 검색 버튼 & 엔터
     const handleSearchSubmit = (e) => {
         e.preventDefault();
@@ -41,6 +42,7 @@ function BookList({books, onTransform}) {
         });
     };
     
+    const filteredBooks = books || [];
 
     return (
         <div className='list-container'>
@@ -87,8 +89,8 @@ function BookList({books, onTransform}) {
             <ul className="book-list">
                 {books.length === 0 ? (
                     <p>등록된 도서가 없습니다.</p>
-                ) : filteredBooks.length > 0 ? (
-                    filteredBooks.map(b => (
+                ) : books.length > 0 ? (
+                    books.map(b => (
                         <BookItem
                             key={b.id}
                             id={b.id}

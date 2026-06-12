@@ -1165,3 +1165,73 @@
 .book-category-badge--5 { background-color: #5a4fcf; color: #ffffff; } /* 컴퓨터/IT */
 .book-category-badge--6 { background-color: #8d99ae; color: #ffffff; } /* 기타 */
 .book-category-badge--unknown { background-color: #cbd5e1; color: #1a1a1a; }
+
+/* 전체 통합 카드 */
+.viewbook-ai-request-wrapper {
+  margin-top: 30px;
+  padding: 30px;
+  background-color: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(138, 43, 226, 0.06);
+  border: 1px solid #eaeaea;
+}
+
+/* 내부 가로 배치 레이아웃 */
+.viewbook-ai-request-wrapper .container {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+}
+
+/* 왼쪽 입력 영역 */
+.viewbook-ai-request-wrapper .input-side {
+  flex: 1.2;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+/* 도서 내용 수정창 */
+.viewbook-textarea-group {
+  margin-bottom: 0;
+}
+
+.viewbook-feedback-textarea {
+  width: 96.25%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  font-size: 14px;
+  line-height: 1.5;
+  resize: none;
+}
+
+/* 오른쪽 미리보기 영역 */
+.viewbook-ai-request-wrapper .preview-side {
+  flex: 0.8;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: sticky;
+  top: 20px;
+}
+
+.viewbook-ai-request-wrapper .preview-side img,
+.viewbook-ai-request-wrapper .no-preview {
+  width: 100%;
+  aspect-ratio: 1 / 1.5;
+  object-fit: cover;
+  border-radius: 12px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.viewbook-ai-request-wrapper .no-preview {
+  background-color: #f3f4f6;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #9ca3af;
+  border: 2px dashed #e5e7eb;
+}
