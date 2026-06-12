@@ -9,7 +9,7 @@ import ViewBook from './components/ViewBook';
 import RemoveBook from './components/RemoveBook';
 import UnavailableBook from './components/UnavailableBook';
 import UnavailableBackend from './components/UnavailableBackend';
-import ProblemOccured from './components/ProblemOccured';
+import ProblemOccured from './components/ProblemOccured';
 function App() {
   // 1. 상태(State) 관리
   const [books, setBooks] = useState([]); // 전체 도서 목록 상태
@@ -20,23 +20,23 @@ function App() {
   // 백엔드 데이터베이스 연결 주소
   const API_URL = 'http://localhost:8080/books';
 
-  const runBookRequest = async (request, { errorMessage } = {}) => {
+  const runBookRequest = async (request, { errorMessage } = {}) => {
     try {
       const response = await request();
 
       if (response.ok) {
-        // Some responses may have an empty body even with 2xx; content-length may be unavailable in browsers.
-        const text = await response.text();
-        if (!text) {
+        // Some responses may have an empty body even with 2xx; content-length may be unavailable in browsers.
+        const text = await response.text();
+        if (!text) {
           return { success: true, status: response.status, data: null };
         }
 
         try {
-          const data = JSON.parse(text);
+          const data = JSON.parse(text);
           return { success: true, status: response.status, data };
         } catch (error) {
           console.error('JSON 파싱 실패:', error);
-          return { success: false, status: response.status, errorType: 'PARSE_ERROR', error, data: null };
+          return { success: false, status: response.status, errorType: 'PARSE_ERROR', error, data: null };
         }
       }
 
@@ -65,11 +65,11 @@ function App() {
   const fetchBooks = async (filterData = null) => {
     let url = API_URL;
 
-  
+
     if (filterData) {
-      const { category, searchField, keyword } = filterData;
-      // 예: http://localhost:8080/books?category=소설&searchField=title&keyword=자바
-      url = `${API_URL}?category=${encodeURIComponent(category)}&searchField=${encodeURIComponent(searchField)}&keyword=${encodeURIComponent(keyword)}`;
+      const { category, searchType, keyword } = filterData;
+      // 예: http://localhost:8080/books?category=소설&searchType=title&keyword=자바
+      url = `${API_URL}?category=${encodeURIComponent(category)}&searchType=${encodeURIComponent(searchType)}&keyword=${encodeURIComponent(keyword)}`;
     }
 
     const booksResponse = await runBookRequest(
@@ -80,12 +80,12 @@ function App() {
     );
 
     if (booksResponse.success) {
-      setBooks(Array.isArray(booksResponse.data) ? booksResponse.data : []);
+      setBooks(Array.isArray(booksResponse.data) ? booksResponse.data : []);
     } else {
       if (booksResponse.errorType === 'NETWORK_ERROR' || booksResponse.errorType === 'SERVER_ERROR') {
         setCurrentView('backendunavailable');
-      } else {
-        setCurrentView('problemoccured');
+      } else {
+        setCurrentView('problemoccured');
       }
     }
   };
@@ -97,8 +97,41 @@ function App() {
     setSelectedBookId(bookId);
   };
 
+  // AI 표지가 성공적으로 생성되었을 때 호출되는 백엔드 PATCH 콜백
+  const handleUpdateCoverApi = async (bookId, updatedBookWithImage) => {
+    const coverResponse = await runBookRequest(
+      () => fetch(`${API_URL}/${bookId}/cover`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          coverImageUrl: updatedBookWithImage.coverImageUrl,
+        }),
+      }),
+      { errorMessage: 'PATCH 요청 중 오류 발생:' }
+    );
+
+    if (coverResponse.success) {
+      const finalBook = coverResponse.data;
+      alert("생성된 AI 표지가 최종 반영되었습니다!");
+      setBooks(prevBooks => prevBooks.map(b => b.id === finalBook.id ? finalBook : b));
+      setSelectedBookId(finalBook.id);
+      setCurrentView('list');
+      return true;
+    } else {
+      if (coverResponse.errorType === 'NETWORK_ERROR' || coverResponse.errorType === 'SERVER_ERROR') {
+        setCurrentView('backendunavailable');
+      } else if (coverResponse.status === 404) {
+        setCurrentView('unavailable');
+      } else {
+        setCurrentView('problemoccured');
+      }
+      alert("표지를 저장하는 데 실패했습니다.");
+      return false;
+    }
+  };
+
   // 4. CRUD 비즈니스 로직 핸들러
-  
+
   // 신규 도서 등록 (onSubmit) post
   const handleSubmit = async (bookObject) => {
     const currentTime = new Date().toISOString();
@@ -118,8 +151,8 @@ function App() {
     );
 
     if (newBookResponse.success) {
-      setBooks(prevBooks => [...prevBooks, newBookResponse.data]); 
-      setCurrentView('view'); 
+      setBooks(prevBooks => [...prevBooks, newBookResponse.data]);
+      setCurrentView('view');
       setSelectedBookId(newBookResponse.data.id);
     } else {
       if (newBookResponse.errorType === 'NETWORK_ERROR' || newBookResponse.errorType === 'SERVER_ERROR') {
@@ -173,7 +206,7 @@ function App() {
 
     if (deleted.success) {
       setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId));
-      setCurrentView('list'); 
+      setCurrentView('list');
       setSelectedBookId(null);
     } else {
       if (deleted.errorType === 'NETWORK_ERROR' || deleted.errorType === 'SERVER_ERROR') {
@@ -192,45 +225,46 @@ function App() {
     switch (currentView) {
       case 'list':
         return (
-          <BookList 
-            books={books} 
-            onTransform={handleTransform} 
+          <BookList
+            books={books}
+            onTransform={handleTransform}
             onSearch={fetchBooks}
           />
         );
       case 'add':
         return (
-          <AddBook 
-            onSubmit={handleSubmit} 
+          <AddBook
+            onSubmit={handleSubmit}
             onTransform={handleTransform}
           />
         );
       case 'edit':
         return (
-          <EditBook 
-            book={currentBook} 
-            onRevise={handleRevise} 
+          <EditBook
+            book={currentBook}
+            onRevise={handleRevise}
             onTransform={handleTransform}
             prevPage={prevPage}
           />
         );
       case 'view':
         return (
-          <ViewBook 
-            book={currentBook} 
+          <ViewBook
+            book={currentBook}
             onTransform={handleTransform}
+            onUpdateCover={handleUpdateCoverApi}
           />
         );
       case 'remove':
         return (
-          <RemoveBook 
+          <RemoveBook
             book={currentBook}
-            onDelete={handleDelete} 
+            onDelete={handleDelete}
             onTransform={handleTransform}
             prevPage={prevPage}
           />
         );
-      case 'unavailable': 
+      case 'unavailable':
         return (
           <UnavailableBook />
         );
@@ -249,14 +283,14 @@ function App() {
 
   return (
     <div className="app-container">
-      {currentView !== 'backendunavailable' && ( 
+      {currentView !== 'backendunavailable' && (
         <Header onTransform={handleTransform} currentPage={currentView} />
       )}
-      
+
       <main className="main-content">
         {renderView()}
       </main>
-      
+
       <Footer />
     </div>
   );
