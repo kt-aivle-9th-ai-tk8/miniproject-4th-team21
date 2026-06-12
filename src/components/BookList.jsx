@@ -42,8 +42,6 @@ function BookList({books, onTransform, onSearch}) {
         });
     };
     
-    const filteredBooks = books || [];
-
     return (
         <div className='list-container'>
             <header className='list-header'>
@@ -89,7 +87,7 @@ function BookList({books, onTransform, onSearch}) {
             <ul className="book-list">
                 {books.length === 0 ? (
                     <p>등록된 도서가 없습니다.</p>
-                ) : books.length > 0 ? (
+                ) : (
                     books.map(b => (
                         <BookItem
                             key={b.id}
@@ -103,8 +101,6 @@ function BookList({books, onTransform, onSearch}) {
                             onTransform={onTransform}
                         />
                     ))
-                ) : (
-                    <p>조건에 맞는 도서가 없습니다.</p>
                 )}
             </ul>
         </div>

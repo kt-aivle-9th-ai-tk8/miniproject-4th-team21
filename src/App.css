@@ -435,6 +435,19 @@
   max-height: 400px;
 }
 
+.cover-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+  font-weight: 600;
+  border-radius: var(--radius-sm);
+  z-index: 2;
+}
+
 .viewbook-cover-wrapper img {
   width: 100%;
   height: auto;
