@@ -9,7 +9,7 @@ import ViewBook from './components/ViewBook';
 import RemoveBook from './components/RemoveBook';
 import UnavailableBook from './components/UnavailableBook';
 import UnavailableBackend from './components/UnavailableBackend';
-
+import ProblemOccured from './components/ProblemOccured';
 function App() {
   // 1. 상태(State) 관리
   const [books, setBooks] = useState([]); // 전체 도서 목록 상태
@@ -20,22 +20,23 @@ function App() {
   // 백엔드 데이터베이스 연결 주소
   const API_URL = 'http://localhost:8080/books';
 
-  const runBookRequest = async (request, { errorMessage, onSuccess } = {}) => {
+  const runBookRequest = async (request, { errorMessage } = {}) => {
     try {
       const response = await request();
 
       if (response.ok) {
-        const isNoContent = response.status === 204 || response.headers.get('content-length') === '0';
-        if (isNoContent) {
+        // Some responses may have an empty body even with 2xx; content-length may be unavailable in browsers.
+        const text = await response.text();
+        if (!text) {
           return { success: true, status: response.status, data: null };
         }
 
         try {
-          const data = await response.json();
+          const data = JSON.parse(text);
           return { success: true, status: response.status, data };
         } catch (error) {
           console.error('JSON 파싱 실패:', error);
-          return { success: false, status: response.status, data: null };
+          return { success: false, status: response.status, errorType: 'PARSE_ERROR', error, data: null };
         }
       }
 
@@ -75,15 +76,16 @@ function App() {
       () => fetch(url),
       {
         errorMessage: '도서 목록을 불러오는 중 오류 발생:',
-        //onError: () => setCurrentView('backendunavailable'),
       }
     );
 
     if (booksResponse.success) {
-      setBooks(booksResponse.data);
+      setBooks(Array.isArray(booksResponse.data) ? booksResponse.data : []);
     } else {
       if (booksResponse.errorType === 'NETWORK_ERROR' || booksResponse.errorType === 'SERVER_ERROR') {
         setCurrentView('backendunavailable');
+      } else {
+        setCurrentView('problemoccured');
       }
     }
   };
