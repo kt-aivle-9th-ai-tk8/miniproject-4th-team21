@@ -24,8 +24,6 @@ function BookList({books, onTransform, onSearch}) {
             keyword: searchKeyword.trim()
         });
     };
-    
-    const filteredBooks = books || [];
 
     return (
         <div className='list-container'>
