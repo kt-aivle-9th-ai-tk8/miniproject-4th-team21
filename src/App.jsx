@@ -26,8 +26,11 @@ function App() {
 
       if (response.ok) {
         // Some responses may have an empty body even with 2xx; content-length may be unavailable in browsers.
+
         const text = await response.text();
+
         if (!text) {
+
           return { success: true, status: response.status, data: null };
         }
 
@@ -85,7 +88,9 @@ function App() {
       if (booksResponse.errorType === 'NETWORK_ERROR' || booksResponse.errorType === 'SERVER_ERROR') {
         setCurrentView('backendunavailable');
       } else {
+
         setCurrentView('problemoccured');
+
       }
     }
   };
@@ -100,7 +105,7 @@ function App() {
   // AI 표지가 성공적으로 생성되었을 때 호출되는 백엔드 PATCH 콜백
   const handleUpdateCoverApi = async (bookId, updatedBookWithImage) => {
     const coverResponse = await runBookRequest(
-      () => fetch(`${API_URL}/${bookId}/cover`, {
+      () => fetch(`http://localhost:8080/books/${bookId}/cover`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -111,20 +116,22 @@ function App() {
     );
 
     if (coverResponse.success) {
-      const finalBook = coverResponse.data;
+      const finalBook = coverResponse.data; 
       alert("생성된 AI 표지가 최종 반영되었습니다!");
-      setBooks(prevBooks => prevBooks.map(b => b.id === finalBook.id ? finalBook : b));
-      setSelectedBookId(finalBook.id);
-      setCurrentView('list');
+      setBooks(prevBooks => 
+        prevBooks.map(b => b.id === finalBook.id ? finalBook : b)
+      );
+
+      setSelectedBookId(finalBook.id); 
+      setCurrentView('list'); 
       return true;
     } else {
       if (coverResponse.errorType === 'NETWORK_ERROR' || coverResponse.errorType === 'SERVER_ERROR') {
         setCurrentView('backendunavailable');
-      } else if (coverResponse.status === 404) {
-        setCurrentView('unavailable');
       } else {
         setCurrentView('problemoccured');
       }
+      
       alert("표지를 저장하는 데 실패했습니다.");
       return false;
     }
@@ -151,8 +158,8 @@ function App() {
     );
 
     if (newBookResponse.success) {
-      setBooks(prevBooks => [...prevBooks, newBookResponse.data]);
-      setCurrentView('view');
+      setBooks(prevBooks => [...prevBooks, newBookResponse.data]); 
+      setCurrentView('view'); 
       setSelectedBookId(newBookResponse.data.id);
     } else {
       if (newBookResponse.errorType === 'NETWORK_ERROR' || newBookResponse.errorType === 'SERVER_ERROR') {
@@ -206,7 +213,7 @@ function App() {
 
     if (deleted.success) {
       setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId));
-      setCurrentView('list');
+      setCurrentView('list'); 
       setSelectedBookId(null);
     } else {
       if (deleted.errorType === 'NETWORK_ERROR' || deleted.errorType === 'SERVER_ERROR') {
