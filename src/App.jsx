@@ -9,6 +9,7 @@ import ViewBook from './components/ViewBook';
 import RemoveBook from './components/RemoveBook';
 import UnavailableBook from './components/UnavailableBook';
 import UnavailableBackend from './components/UnavailableBackend';
+import ProblemOccured from './components/ProblemOccured';
 
 function App() {
   // 1. 상태(State) 관리
@@ -20,23 +21,46 @@ function App() {
   // 백엔드 데이터베이스 연결 주소 -> 기존 json-server(3000) 삭제
   const API_URL = 'http://localhost:8080/books';
 
-  const runBookRequest = async (request, { errorMessage, onSuccess, onError } = {}) => {
+  const runBookRequest = async (request, { errorMessage } = {}) => {
+
     try {
       const response = await request();
 
-      if (!response.ok) { // 정상응답(200번대) 여부 검증
-        return null;
+      if (response.ok) {
+        // Some responses may have an empty body even with 2xx; content-length may be unavailable in browsers.
+
+        const text = await response.text();
+
+        if (!text) {
+
+          return { success: true, status: response.status, data: null };
+        }
+
+        try {
+          const data = JSON.parse(text);
+
+          return { success: true, status: response.status, data };
+        } catch (error) {
+          console.error('JSON 파싱 실패:', error);
+          return { success: false, status: response.status, errorType: 'PARSE_ERROR', error, data: null };
+
+        }
       }
 
-      const data = response.status === 204 ? true : await response.json(); // 204 No Content인 경우 JSON 파싱 생략
-      onSuccess?.(data);
-      return data;
+      let errorBody = null;
+      try {
+        errorBody = await response.json();
+      } catch {
+        try {
+          errorBody = await response.text();
+        } catch {}
+      }
+      return { success: false, status: response.status, errorType: response.status >= 500 ? 'SERVER_ERROR' : 'CLIENT_ERROR', error: errorBody };
     } catch (error) {
-      onError?.(error);
       if (errorMessage) {
         console.error(errorMessage, error);
       }
-      return null;
+      return { success: false, status: null, errorType: 'NETWORK_ERROR', error };
     }
   };
 
@@ -55,16 +79,24 @@ function App() {
       url = `${API_URL}?category=${encodeURIComponent(category)}&searchType=${encodeURIComponent(searchType)}&keyword=${encodeURIComponent(keyword)}`;
     }
 
-    const booksData = await runBookRequest(
+    const booksResponse = await runBookRequest(
       () => fetch(url),
       {
         errorMessage: '도서 목록을 불러오는 중 오류 발생:',
-        onError: () => setCurrentView('backendunavailable'),
       }
     );
 
-    if (booksData) {
-      setBooks(booksData);
+    if (booksResponse.success) {
+      setBooks(Array.isArray(booksResponse.data) ? booksResponse.data : []);
+
+    } else {
+      if (booksResponse.errorType === 'NETWORK_ERROR' || booksResponse.errorType === 'SERVER_ERROR') {
+        setCurrentView('backendunavailable');
+      } else {
+
+        setCurrentView('problemoccured');
+
+      }
     }
   };
 
@@ -77,7 +109,7 @@ function App() {
 
   // AI 표지가 성공적으로 생성되었을 때 호출되는 백엔드 PATCH 콜백
   const handleUpdateCoverApi = async (bookId, updatedBookWithImage) => {
-    const result = await runBookRequest(
+    const coverResponse = await runBookRequest(
       () => fetch(`http://localhost:8080/books/${bookId}/cover`, {
         method: 'PATCH',
         headers: {
@@ -90,23 +122,26 @@ function App() {
       { errorMessage: 'PATCH 요청 중 오류 발생:' }
     );
 
-    if (!result || !result.success) {
-      setCurrentView('problemoccured');
+    if (coverResponse.success) {
+      const finalBook = coverResponse.data; 
+      alert("생성된 AI 표지가 최종 반영되었습니다!");
+      setBooks(prevBooks => 
+        prevBooks.map(b => b.id === finalBook.id ? finalBook : b)
+      );
+
+      setSelectedBookId(finalBook.id); 
+      setCurrentView('list'); 
+      return true;
+    } else {
+      if (coverResponse.errorType === 'NETWORK_ERROR' || coverResponse.errorType === 'SERVER_ERROR') {
+        setCurrentView('backendunavailable');
+      } else {
+        setCurrentView('problemoccured');
+      }
       
       alert("표지를 저장하는 데 실패했습니다.");
       return false;
     }
-
-    const finalBook = result.data; 
-    alert("생성된 AI 표지가 최종 반영되었습니다!");
-    
-    setBooks(prevBooks => 
-      prevBooks.map(b => b.id === finalBook.id ? finalBook : b)
-    );
-    
-    setSelectedBookId(finalBook.id); 
-    setCurrentView('list'); 
-    return true;
   };
 
   // 4. CRUD 비즈니스 로직 핸들러
@@ -120,7 +155,7 @@ function App() {
       updatedAt: currentTime
     };
 
-    const newBook = await runBookRequest(
+    const newBookResponse = await runBookRequest(
       () => fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -129,10 +164,16 @@ function App() {
       { errorMessage: '도서 등록 실패:' }
     );
 
-    if (newBook) {
-      setBooks(prevBooks => [...prevBooks, newBook]); 
+    if (newBookResponse.success) {
+      setBooks(prevBooks => [...prevBooks, newBookResponse.data]); 
       setCurrentView('view'); 
-      setSelectedBookId(newBook.id);
+      setSelectedBookId(newBookResponse.data.id);
+    } else {
+      if (newBookResponse.errorType === 'NETWORK_ERROR' || newBookResponse.errorType === 'SERVER_ERROR') {
+        setCurrentView('backendunavailable');
+      } else {
+        setCurrentView('problemoccured');
+      }
     }
   };
 
@@ -144,28 +185,28 @@ function App() {
       updatedAt: currentTime
     };
 
-    const response = await fetch(`${API_URL}/${bookId}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(bookWithTimestamps),
-    });
+    const revisedBookResponse = await runBookRequest(
+      () => fetch(`${API_URL}/${bookId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(bookWithTimestamps),
+      }),
+      { errorMessage: '도서 수정 실패:' }
+    );
 
-    if (response.status === 404) {
-      setCurrentView('unavailable');
-      setSelectedBookId(null);
-      return;
+    if (revisedBookResponse.success) {
+      setBooks(prevBooks => prevBooks.map(book => book.id === bookId ? revisedBookResponse.data : book));
+      setCurrentView('view');
+      setSelectedBookId(revisedBookResponse.data.id);
+    } else {
+      if (revisedBookResponse.errorType === 'NETWORK_ERROR' || revisedBookResponse.errorType === 'SERVER_ERROR') {
+        setCurrentView('backendunavailable');
+      } else if (revisedBookResponse.status === 404) {
+        setCurrentView('unavailable');
+      } else {
+        setCurrentView('problemoccured');
+      }
     }
-
-    if (!response.ok) {
-      console.error('도서 수정 실패:');
-      return;
-    }
-
-    const revisedBook = await response.json();
-
-    setBooks(prevBooks => prevBooks.map(book => book.id === bookId ? revisedBook : book)); 
-    setCurrentView('view'); 
-    setSelectedBookId(revisedBook.id);
   };
 
   // 특정 도서 삭제 (onDelete) delete
@@ -177,9 +218,18 @@ function App() {
       { errorMessage: '도서 삭제 실패:' }
     );
 
-    if (deleted !== null) {
+    if (deleted.success) {
       setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId));
       setCurrentView('list'); 
+      setSelectedBookId(null);
+    } else {
+      if (deleted.errorType === 'NETWORK_ERROR' || deleted.errorType === 'SERVER_ERROR') {
+        setCurrentView('backendunavailable');
+      } else if (deleted.status === 404) {
+        setCurrentView('unavailable');
+      } else {
+        setCurrentView('problemoccured');
+      }
     }
   };
 
@@ -236,8 +286,12 @@ function App() {
         return (
           <UnavailableBackend />
         );
+      case 'problemoccured':
+        return (
+          <ProblemOccured />
+        );
       default:
-        return <BookList books={books} onTransform={handleTransform} onSearch={handleSearchSubmit} />;
+        return <BookList books={books} onTransform={handleTransform} onSearch={fetchBooks} />;
     }
   };
 
