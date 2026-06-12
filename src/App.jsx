@@ -10,7 +10,6 @@ import RemoveBook from './components/RemoveBook';
 import UnavailableBook from './components/UnavailableBook';
 import UnavailableBackend from './components/UnavailableBackend';
 import ProblemOccured from './components/ProblemOccured';
-
 function App() {
   // 1. 상태(State) 관리
   const [books, setBooks] = useState([]); // 전체 도서 목록 상태
@@ -18,11 +17,10 @@ function App() {
   const [selectedBookId, setSelectedBookId] = useState(999); // 선택된 도서의 ID 관리
   const [prevPage, setPrevPage] = useState('list'); // 이전 페이지(화면) 저장
 
-  // 백엔드 데이터베이스 연결 주소 -> 기존 json-server(3000) 삭제
+  // 백엔드 데이터베이스 연결 주소
   const API_URL = 'http://localhost:8080/books';
 
   const runBookRequest = async (request, { errorMessage } = {}) => {
-
     try {
       const response = await request();
 
@@ -38,12 +36,10 @@ function App() {
 
         try {
           const data = JSON.parse(text);
-
           return { success: true, status: response.status, data };
         } catch (error) {
           console.error('JSON 파싱 실패:', error);
           return { success: false, status: response.status, errorType: 'PARSE_ERROR', error, data: null };
-
         }
       }
 
@@ -72,7 +68,7 @@ function App() {
   const fetchBooks = async (filterData = null) => {
     let url = API_URL;
 
-  
+
     if (filterData) {
       const { category, searchType, keyword } = filterData;
       // 예: http://localhost:8080/books?category=소설&searchType=title&keyword=자바
@@ -88,7 +84,6 @@ function App() {
 
     if (booksResponse.success) {
       setBooks(Array.isArray(booksResponse.data) ? booksResponse.data : []);
-
     } else {
       if (booksResponse.errorType === 'NETWORK_ERROR' || booksResponse.errorType === 'SERVER_ERROR') {
         setCurrentView('backendunavailable');
@@ -112,11 +107,9 @@ function App() {
     const coverResponse = await runBookRequest(
       () => fetch(`http://localhost:8080/books/${bookId}/cover`, {
         method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          coverImageUrl: updatedBookWithImage.coverImageUrl 
+          coverImageUrl: updatedBookWithImage.coverImageUrl,
         }),
       }),
       { errorMessage: 'PATCH 요청 중 오류 발생:' }
@@ -145,7 +138,7 @@ function App() {
   };
 
   // 4. CRUD 비즈니스 로직 핸들러
-  
+
   // 신규 도서 등록 (onSubmit) post
   const handleSubmit = async (bookObject) => {
     const currentTime = new Date().toISOString();
@@ -239,46 +232,46 @@ function App() {
     switch (currentView) {
       case 'list':
         return (
-          <BookList 
-            books={books} 
-            onTransform={handleTransform} 
+          <BookList
+            books={books}
+            onTransform={handleTransform}
             onSearch={fetchBooks}
           />
         );
       case 'add':
         return (
-          <AddBook 
-            onSubmit={handleSubmit} 
+          <AddBook
+            onSubmit={handleSubmit}
             onTransform={handleTransform}
           />
         );
       case 'edit':
         return (
-          <EditBook 
-            book={currentBook} 
-            onRevise={handleRevise} 
+          <EditBook
+            book={currentBook}
+            onRevise={handleRevise}
             onTransform={handleTransform}
             prevPage={prevPage}
           />
         );
       case 'view':
         return (
-          <ViewBook 
-            book={currentBook} 
+          <ViewBook
+            book={currentBook}
             onTransform={handleTransform}
             onUpdateCover={handleUpdateCoverApi}
           />
         );
       case 'remove':
         return (
-          <RemoveBook 
+          <RemoveBook
             book={currentBook}
-            onDelete={handleDelete} 
+            onDelete={handleDelete}
             onTransform={handleTransform}
             prevPage={prevPage}
           />
         );
-      case 'unavailable': 
+      case 'unavailable':
         return (
           <UnavailableBook />
         );
@@ -297,14 +290,14 @@ function App() {
 
   return (
     <div className="app-container">
-      {currentView !== 'backendunavailable' && ( 
+      {currentView !== 'backendunavailable' && (
         <Header onTransform={handleTransform} currentPage={currentView} />
       )}
-      
+
       <main className="main-content">
         {renderView()}
       </main>
-      
+
       <Footer />
     </div>
   );
