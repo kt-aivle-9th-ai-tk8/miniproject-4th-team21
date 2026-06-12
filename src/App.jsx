@@ -105,7 +105,7 @@ function App() {
   // AI 표지가 성공적으로 생성되었을 때 호출되는 백엔드 PATCH 콜백
   const handleUpdateCoverApi = async (bookId, updatedBookWithImage) => {
     const coverResponse = await runBookRequest(
-      () => fetch(`http://localhost:8080/books/${bookId}/cover`, {
+      () => fetch(`${API_URL}/${bookId}/cover`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -128,7 +128,8 @@ function App() {
     } else {
       if (coverResponse.errorType === 'NETWORK_ERROR' || coverResponse.errorType === 'SERVER_ERROR') {
         setCurrentView('backendunavailable');
-      } else {
+      } else if (coverResponse.status === 404) { setCurrentView('unavailable') } 
+      else {
         setCurrentView('problemoccured');
       }
       
