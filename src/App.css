@@ -55,6 +55,11 @@
   user-select: none;
 }
 
+.header-logo a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .header-nav {
   display: flex;
   gap: 10px;
