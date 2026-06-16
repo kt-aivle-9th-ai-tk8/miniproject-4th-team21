@@ -27,8 +27,11 @@ function App() {
 
       if (response.ok) {
         // Some responses may have an empty body even with 2xx; content-length may be unavailable in browsers.
+
         const text = await response.text();
+
         if (!text) {
+
           return { success: true, status: response.status, data: null };
         }
 
@@ -105,7 +108,7 @@ function App() {
     );
 
     if (coverResponse.success) {
-      const finalBook = coverResponse.data;
+      const finalBook = coverResponse.data; 
       alert("생성된 AI 표지가 최종 반영되었습니다!");
       setBooks(prevBooks => prevBooks.map(b => b.id === finalBook.id ? finalBook : b));
       navigate('/');
@@ -118,6 +121,7 @@ function App() {
       } else {
         navigate('/error');
       }
+
       alert("표지를 저장하는 데 실패했습니다.");
       return false;
     }

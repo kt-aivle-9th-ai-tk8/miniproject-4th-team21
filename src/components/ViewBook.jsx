@@ -10,7 +10,7 @@ export default function ViewBook({ books, onUpdateCover }) {
   const [isAiMode, setIsAiMode] = useState(false); 
   const [isPatching, setIsPatching] = useState(false); 
 
-  // 상세 페이지 전용 임시 내용 입력 상태 추가 (초기값은 현재 책의 내용)
+  // 상세 페이지 전용 디자인 프롬프트 작성 위한 것
   const [tempContent, setTempContent] = useState("");
 
   const navigate = useNavigate();
