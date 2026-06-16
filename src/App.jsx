@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Routes, Route, useNavigate, useLocation } from 'react-router-dom';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -13,10 +13,10 @@ import UnavailableBackend from './components/UnavailableBackend';
 import ProblemOccured from './components/ProblemOccured';
 function App() {
   const navigate = useNavigate();
-  const location = useLocation();
 
   // 1. 상태(State) 관리
   const [books, setBooks] = useState([]); // 전체 도서 목록 상태
+  const [serverError, setServerError] = useState(false); // 백엔드 연결 실패 상태
 
   // 백엔드 데이터베이스 연결 주소
   const API_URL = 'http://localhost:8080/books';
@@ -84,7 +84,7 @@ function App() {
       setBooks(Array.isArray(booksResponse.data) ? booksResponse.data : []);
     } else {
       if (booksResponse.errorType === 'NETWORK_ERROR' || booksResponse.errorType === 'SERVER_ERROR') {
-        navigate('/error/server');
+        setServerError(true);
       } else {
         navigate('/error');
       }
@@ -112,7 +112,7 @@ function App() {
       return true;
     } else {
       if (coverResponse.errorType === 'NETWORK_ERROR' || coverResponse.errorType === 'SERVER_ERROR') {
-        navigate('/error/server');
+        setServerError(true);
       } else if (coverResponse.status === 404) {
         navigate('/error/not-found');
       } else {
@@ -148,7 +148,7 @@ function App() {
       navigate(`/books/${newBookResponse.data.id}`);
     } else {
       if (newBookResponse.errorType === 'NETWORK_ERROR' || newBookResponse.errorType === 'SERVER_ERROR') {
-        navigate('/error/server');
+        setServerError(true);
       } else {
         navigate('/error');
       }
@@ -177,7 +177,7 @@ function App() {
       navigate(`/books/${revisedBookResponse.data.id}`);
     } else {
       if (revisedBookResponse.errorType === 'NETWORK_ERROR' || revisedBookResponse.errorType === 'SERVER_ERROR') {
-        navigate('/error/server');
+        setServerError(true);
       } else if (revisedBookResponse.status === 404) {
         navigate('/error/not-found');
       } else {
@@ -200,7 +200,7 @@ function App() {
       navigate('/');
     } else {
       if (deleted.errorType === 'NETWORK_ERROR' || deleted.errorType === 'SERVER_ERROR') {
-        navigate('/error/server');
+        setServerError(true);
       } else if (deleted.status === 404) {
         navigate('/error/not-found');
       } else {
@@ -209,14 +209,10 @@ function App() {
     }
   };
 
-  // 백엔드 사용불가 시 Header 숨김 (메뉴 전환 차단)
-  const isServerError = location.pathname === '/error/server';
-
   return (
     <div className="app-container">
-      {!isServerError && (
-        <Header />
-      )}
+      <Header />
+      {serverError && <UnavailableBackend onRetry={() => { setServerError(false); fetchBooks(); }} />}
 
       <main className="main-content">
         <Routes>
@@ -250,7 +246,6 @@ function App() {
             />
           } />
           <Route path="/error/not-found" element={<UnavailableBook />} />
-          <Route path="/error/server" element={<UnavailableBackend />} />
           <Route path="/error" element={<ProblemOccured />} />
           <Route path="*" element={<UnavailableBook />} />
         </Routes>
