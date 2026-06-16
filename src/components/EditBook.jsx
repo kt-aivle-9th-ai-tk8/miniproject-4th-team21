@@ -1,12 +1,17 @@
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import BookForm from "./BookForm";
 import BookCoverAIRequest from "./BookCoverAIRequest";
 
 // App.jsx 하위 부모 컴포넌트 - 책 내용 수정 페이지
-function EditBook({ onTransform, onRevise, book, prevPage }) {
+function EditBook({ onRevise, books }) {
+    const { id } = useParams();
+    const book = books.find(b => b.id === Number(id));
+    const navigate = useNavigate();
+
     // book 데이터 없을 때
     if (book === null || book === undefined) {
-        onTransform('unavailable');
+        navigate('/error/not-found');
         return null;
     }
 
@@ -50,7 +55,7 @@ function EditBook({ onTransform, onRevise, book, prevPage }) {
                 <button type="button" onClick={handleSubmit} className="submit-button">
                     등록
                 </button>
-                <button type="button" onClick={() => onTransform(prevPage, book.id)} className="cancel-button">
+                <button type="button" onClick={() => navigate(-1)} className="cancel-button">
                     취소
                 </button>
             </div>

@@ -8,7 +8,7 @@ const SEARCH_FIELDS = [
     { value: 'author', label: '저자명' },
 ];
 
-function BookList({books, onTransform, onSearch}) {
+function BookList({books, onSearch}) {
     const [selectedCategory, setSelectedCategory] = useState('');
     const [searchType, setSearchType] = useState('all');
     const [searchKeyword, setSearchKeyword] = useState('');
@@ -98,7 +98,6 @@ function BookList({books, onTransform, onSearch}) {
                             coverImageUrl={b.coverImageUrl}
                             createdAt={b.createdAt}
                             updatedAt={b.updatedAt}
-                            onTransform={onTransform}
                         />
                     ))
                 )}

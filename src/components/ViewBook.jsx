@@ -1,16 +1,22 @@
 import { useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 // 기존 AI 생성기 컴포넌트 그대로 사용 (수정 불필요)
 import BookCoverAIRequest from "./BookCoverAIRequest"; 
 
-export default function ViewBook({ book, onTransform, onUpdateCover }) {
+export default function ViewBook({ books, onUpdateCover }) {
+  const { id } = useParams();
+  const book = books.find(b => b.id === Number(id));
+
   const [isAiMode, setIsAiMode] = useState(false); 
   const [isPatching, setIsPatching] = useState(false); 
 
   // 상세 페이지 전용 임시 내용 입력 상태 추가 (초기값은 현재 책의 내용)
   const [tempContent, setTempContent] = useState("");
 
+  const navigate = useNavigate();
+
   if (!book) {
-    onTransform('unavailable', null);
+    navigate('/error/not-found');
     return null;
   }
 
@@ -44,7 +50,7 @@ export default function ViewBook({ book, onTransform, onUpdateCover }) {
   return (
     <div className="viewbook-container">
       <div className="viewbook-header-bar">
-        <button className="btn-secondary" onClick={() => onTransform('list', null)} disabled={isPatching}>목록으로 돌아가기</button>
+        <button className="btn-secondary" onClick={() => navigate('/')} disabled={isPatching}>목록으로 돌아가기</button>
       </div>
 
       <h1 className="viewbook-page-title">도서 상세 정보</h1>
@@ -72,7 +78,7 @@ export default function ViewBook({ book, onTransform, onUpdateCover }) {
           <p className="viewbook-content-body">{book.content}</p>
 
           <div className="viewbook-action">
-            <button className="btn-danger" onClick={() => onTransform('remove', book.id)} disabled={isPatching}>도서삭제</button>
+            <button className="btn-danger" onClick={() => navigate(`/books/${book.id}/delete`)} disabled={isPatching}>도서삭제</button>
             
             <button 
               className="btn-ai-toggle" 
@@ -82,7 +88,7 @@ export default function ViewBook({ book, onTransform, onUpdateCover }) {
               {isAiMode ? "표지 생성 취소" : "AI 표지 변경"}
             </button>
 
-            <button className="btn-primary" onClick={() => onTransform('edit', book.id)} disabled={isPatching}>정보 수정</button>
+            <button className="btn-primary" onClick={() => navigate(`/books/${book.id}/edit`)} disabled={isPatching}>정보 수정</button>
           </div>
           {/* 상세 페이지 토글 영역에만 텍스트 입력창과 AI 컴포넌트를 나란히 배치 */}
           {isAiMode && (
