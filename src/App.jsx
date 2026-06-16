@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -16,7 +16,8 @@ function App() {
       <Header />
       <main className="main-content">
         <Routes>
-          <Route path="/" element={<BookList />} />
+          <Route path="/" element={<Navigate to="/books" replace />} />
+          <Route path="/books" element={<BookList />} />
           <Route path="/books/new" element={<AddBook />} />
           <Route path="/books/:id" element={<ViewBook />} />
           <Route path="/books/:id/edit" element={<EditBook />} />

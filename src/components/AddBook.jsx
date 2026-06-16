@@ -60,7 +60,7 @@ function AddBook() {
                 <button type="button" onClick={handleSubmit} className="submit-button">
                     등록
                 </button>
-                <button type="button" onClick={() => navigate('/')} className="cancel-button">
+                <button type="button" onClick={() => navigate('/books')} className="cancel-button">
                     취소
                 </button>
             </div>

@@ -66,7 +66,7 @@ export default function ViewBook() {
   return (
     <div className="viewbook-container">
       <div className="viewbook-header-bar">
-        <button className="btn-secondary" onClick={() => navigate('/')} disabled={isPatching}>목록으로 돌아가기</button>
+        <button className="btn-secondary" onClick={() => navigate('/books')} disabled={isPatching}>목록으로 돌아가기</button>
       </div>
 
       <h1 className="viewbook-page-title">도서 상세 정보</h1>

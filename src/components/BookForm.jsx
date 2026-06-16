@@ -79,7 +79,7 @@ function BookForm({ book, onFieldChange }) {
             </div>
 
             <div className="form-group">
-                <label className="form-label">도서 내용</label>
+                <label className="form-label">도서 내용<span className="required">*</span></label>
                 <textarea
                     className="form-input form-textarea"
                     placeholder="도서의 내용을 작성하세요"
@@ -87,6 +87,7 @@ function BookForm({ book, onFieldChange }) {
                     onChange={handleChange('content')}
                     onBlur={handleBlur('content')}
                     maxLength={CONTENT_MAX_LENGTH}
+                    required
                 />
                 <p className="form-counter">
                     {(book.content ?? '').length}/{CONTENT_MAX_LENGTH}

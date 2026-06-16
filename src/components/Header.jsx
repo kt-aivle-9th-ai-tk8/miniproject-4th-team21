@@ -14,8 +14,8 @@ function Header() {
 
       <nav className="header-nav">
         <Link
-          className={`nav-btn${location.pathname === '/' ? ' active' : ''}`}
-          to="/"
+          className={`nav-btn${location.pathname === '/books' ? ' active' : ''}`}
+          to="/books"
         >
           도서 목록
         </Link>

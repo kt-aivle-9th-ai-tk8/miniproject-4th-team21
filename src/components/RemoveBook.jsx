@@ -29,7 +29,7 @@ function RemoveBook() {
     const handleConfirmDelete = async () => {
         const res = await deleteBook(Number(id));
         if (res.success) {
-            navigate('/');
+            navigate('/books');
         } else if (res.status === 404) {
             navigate('/error/not-found');
         } else if (res.errorType === 'NETWORK_ERROR' || res.errorType === 'SERVER_ERROR') {
