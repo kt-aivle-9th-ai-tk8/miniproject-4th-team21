@@ -2,12 +2,12 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import BookForm from "./BookForm";
 import BookCoverAIRequest from "./BookCoverAIRequest";
+import { createBook } from "../api/bookApi";
+import UnavailableBackend from "./UnavailableBackend";
 
-// App.jsx 하위 부모 컴포넌트 - 책 신규 작성/등록 페이지
-function AddBook({ onSubmit }) {
-
+function AddBook() {
     const navigate = useNavigate();
-
+    const [serverError, setServerError] = useState(false);
     const [newBook, setNewBook] = useState({
         id: null,
         title: "",
@@ -23,7 +23,7 @@ function AddBook({ onSubmit }) {
         setNewBook(updatedBook);
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         if (!newBook.title || !newBook.author) {
             alert("제목과 저자는 필수 입력 사항입니다.");
@@ -37,11 +37,19 @@ function AddBook({ onSubmit }) {
             alert("내용은 필수 입력 사항입니다.");
             return;
         }
-        onSubmit(newBook);
+        const res = await createBook(newBook);
+        if (res.success) {
+            navigate(`/books/${res.data.id}`);
+        } else if (res.errorType === 'NETWORK_ERROR' || res.errorType === 'SERVER_ERROR') {
+            setServerError(true);
+        } else {
+            navigate('/error');
+        }
     };
 
     return (
         <div className="form-page-container">
+            {serverError && <UnavailableBackend onRetry={() => setServerError(false)} />}
             <h1>책 신규 작성/등록</h1>
             <BookForm
                 book={newBook}

@@ -1,6 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import BookItem from './BookItem';
 import { CATEGORY_OPTIONS } from '../constants/categoryOptions';
+import { fetchBooks } from '../api/bookApi';
+import UnavailableBackend from './UnavailableBackend';
 
 const SEARCH_FIELDS = [
     { value: 'all', label: '통합검색' },
@@ -8,42 +11,35 @@ const SEARCH_FIELDS = [
     { value: 'author', label: '저자명' },
 ];
 
-function BookList({books, onSearch}) {
+function BookList() {
+    const navigate = useNavigate();
+    const [books, setBooks] = useState([]);
+    const [serverError, setServerError] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [searchType, setSearchType] = useState('all');
     const [searchKeyword, setSearchKeyword] = useState('');
 
-    // 필터링: 카테고리 + (선택된 필드에 대한 키워드 부분일치) -> 백엔드 연동
-    //const keyword = searchKeyword.trim().toLowerCase();
-   /*const filteredBooks = books.filter(b => {
-        const matchCategory = !selectedCategory || b.category === selectedCategory;
+    const loadBooks = async (filterData = null) => {
+        const res = await fetchBooks(filterData);
+        if (res.success) {
+            setBooks(Array.isArray(res.data) ? res.data : []);
+        } else if (res.errorType === 'NETWORK_ERROR' || res.errorType === 'SERVER_ERROR') {
+            setServerError(true);
+        } else {
+            navigate('/error');
+        }
+    };
 
-        if (!keyword) return matchCategory;
+    useEffect(() => { loadBooks(); }, []);
 
-        const title = (b.title ?? '').toLowerCase();
-        const author = (b.author ?? '').toLowerCase();
-        const matchKeyword =
-            searchField === 'title'  ? title.includes(keyword)  :
-            searchField === 'author' ? author.includes(keyword) :
-            /*all                  title.includes(keyword) || author.includes(keyword);
-
-        return matchCategory && matchKeyword;
-    });*/
-    
-    // 검색 버튼 & 엔터
     const handleSearchSubmit = (e) => {
         e.preventDefault();
-        
-        // 백엔드 조회 요청
-        onSearch({
-            category: selectedCategory,
-            searchType: searchType,
-            keyword: searchKeyword.trim()
-        });
+        loadBooks({ category: selectedCategory, searchType, keyword: searchKeyword.trim() });
     };
-    
+
     return (
         <div className='list-container'>
+            {serverError && <UnavailableBackend onRetry={() => { setServerError(false); loadBooks(); }} />}
             <header className='list-header'>
                 <div>
                     <h1>도서 목록</h1>
@@ -52,25 +48,13 @@ function BookList({books, onSearch}) {
             </header>
 
             <form className="book-filters" onSubmit={handleSearchSubmit}>
-                <select
-                    className="filter-select"
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                >
+                <select className="filter-select" value={selectedCategory} onChange={(e) => setSelectedCategory(e.target.value)}>
                     <option value="">전체 카테고리</option>
-                    {CATEGORY_OPTIONS.map(cat => (
-                        <option key={cat} value={cat}>{cat}</option>
-                    ))}
+                    {CATEGORY_OPTIONS.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                 </select>
 
-                <select
-                    className="filter-select"
-                    value={searchType}
-                    onChange={(e) => setSearchType(e.target.value)}
-                >
-                    {SEARCH_FIELDS.map(f => (
-                        <option key={f.value} value={f.value}>{f.label}</option>
-                    ))}
+                <select className="filter-select" value={searchType} onChange={(e) => setSearchType(e.target.value)}>
+                    {SEARCH_FIELDS.map(f => <option key={f.value} value={f.value}>{f.label}</option>)}
                 </select>
 
                 <input
@@ -80,7 +64,6 @@ function BookList({books, onSearch}) {
                     value={searchKeyword}
                     onChange={(e) => setSearchKeyword(e.target.value)}
                 />
-
                 <button type="submit" className="search-button">검색</button>
             </form>
 
