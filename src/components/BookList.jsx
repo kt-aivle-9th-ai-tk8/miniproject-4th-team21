@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import BookItem from './BookItem';
 import { CATEGORY_OPTIONS } from '../constants/categoryOptions';
 import { fetchBooks } from '../api/bookApi';
-import UnavailableBackend from './UnavailableBackend';
+import { useServerRequest } from '../hooks/useServerRequest';
 
 const SEARCH_FIELDS = [
     { value: 'all', label: '통합검색' },
@@ -13,19 +13,22 @@ const SEARCH_FIELDS = [
 
 function BookList() {
     const navigate = useNavigate();
+    const { startLoading, handleServerError, clearStatus, overlay } = useServerRequest();
     const [books, setBooks] = useState([]);
-    const [serverError, setServerError] = useState(false);
     const [selectedCategory, setSelectedCategory] = useState('');
     const [searchType, setSearchType] = useState('all');
     const [searchKeyword, setSearchKeyword] = useState('');
 
     const loadBooks = async (filterData = null) => {
+        startLoading();
         const res = await fetchBooks(filterData);
         if (res.success) {
+            clearStatus();
             setBooks(Array.isArray(res.data) ? res.data : []);
         } else if (res.errorType === 'NETWORK_ERROR' || res.errorType === 'SERVER_ERROR') {
-            setServerError(true);
+            handleServerError(() => loadBooks(filterData)); // retry 기작은 자기자신
         } else {
+            clearStatus();
             navigate('/error');
         }
     };
@@ -38,8 +41,9 @@ function BookList() {
     };
 
     return (
+        <>
+        {overlay}
         <div className='list-container'>
-            {serverError && <UnavailableBackend onRetry={() => { setServerError(false); loadBooks(); }} />}
             <header className='list-header'>
                 <div>
                     <h1>도서 목록</h1>
@@ -86,6 +90,7 @@ function BookList() {
                 )}
             </ul>
         </div>
+        </>
     );
 }
 

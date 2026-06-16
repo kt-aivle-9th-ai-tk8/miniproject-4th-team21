@@ -2,27 +2,29 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import BookCoverAIRequest from "./BookCoverAIRequest";
 import { fetchBookById, updateBookCover } from "../api/bookApi";
-import UnavailableBackend from "./UnavailableBackend";
+import { useServerRequest } from "../hooks/useServerRequest";
 
 export default function ViewBook() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { startLoading, handleServerError, clearStatus, overlay } = useServerRequest();
   const [book, setBook] = useState(null);
-  const [serverError, setServerError] = useState(false);
   const [isAiMode, setIsAiMode] = useState(false);
-  const [isPatching, setIsPatching] = useState(false);
   const [tempContent, setTempContent] = useState("");
 
   const loadBook = () => {
-    setServerError(false);
+    startLoading();
     fetchBookById(id).then(res => {
       if (res.success) {
+        clearStatus();
         setBook(res.data);
       } else if (res.status === 404) {
+        clearStatus();
         navigate('/error/not-found');
       } else if (res.errorType === 'NETWORK_ERROR' || res.errorType === 'SERVER_ERROR') {
-        setServerError(true);
+        handleServerError(loadBook); // retry 기작은 자기자신
       } else {
+        clearStatus();
         navigate('/error');
       }
     });
@@ -38,25 +40,26 @@ export default function ViewBook() {
   };
 
   const handleAiCoverGenerated = async (updatedBookWithImage) => {
-    setIsPatching(true);
+    startLoading();
     const res = await updateBookCover(Number(id), updatedBookWithImage.coverImageUrl);
     if (res.success) {
+      clearStatus();
       alert("생성된 AI 표지가 최종 반영되었습니다!");
       setBook(res.data);
       setIsAiMode(false);
     } else if (res.status === 404) {
+      clearStatus();
       navigate('/error/not-found');
     } else if (res.errorType === 'NETWORK_ERROR' || res.errorType === 'SERVER_ERROR') {
-      setServerError(true);
+      handleServerError(() => handleAiCoverGenerated(updatedBookWithImage)); // retry 기작은 자기자신
     } else {
+      clearStatus();
       alert("표지를 저장하는 데 실패했습니다.");
       navigate('/error');
     }
-    setIsPatching(false);
   };
 
-  if (serverError) return <UnavailableBackend onRetry={() => book ? setServerError(false) : loadBook()} />;
-  if (!book) return <p className="status-text">불러오는 중...</p>;
+  if (!book) return overlay;
 
   const modifiedBookForAi = {
     ...book,
@@ -64,9 +67,11 @@ export default function ViewBook() {
   };
 
   return (
+    <>
+    {overlay}
     <div className="viewbook-container">
       <div className="viewbook-header-bar">
-        <button className="btn-secondary" onClick={() => navigate('/books')} disabled={isPatching}>목록으로 돌아가기</button>
+        <button className="btn-secondary" onClick={() => navigate('/books')}>목록으로 돌아가기</button>
       </div>
 
       <h1 className="viewbook-page-title">도서 상세 정보</h1>
@@ -78,7 +83,6 @@ export default function ViewBook() {
           ) : (
             <span className="no-cover-image">이미지 없음</span>
           )}
-          {isPatching && <div className="cover-loading-overlay">저장 중...</div>}
         </div>
 
         <div className="viewbook-info">
@@ -94,11 +98,11 @@ export default function ViewBook() {
           <p className="viewbook-content-body">{book.content}</p>
 
           <div className="viewbook-action">
-            <button className="btn-danger" onClick={() => navigate(`/books/${book.id}/delete`)} disabled={isPatching}>도서삭제</button>
-            <button className="btn-ai-toggle" onClick={() => setIsAiMode(!isAiMode)} disabled={isPatching}>
+            <button className="btn-danger" onClick={() => navigate(`/books/${book.id}/delete`)}>도서삭제</button>
+            <button className="btn-ai-toggle" onClick={() => setIsAiMode(!isAiMode)}>
               {isAiMode ? "표지 생성 취소" : "AI 표지 변경"}
             </button>
-            <button className="btn-primary" onClick={() => navigate(`/books/${book.id}/edit`)} disabled={isPatching}>정보 수정</button>
+            <button className="btn-primary" onClick={() => navigate(`/books/${book.id}/edit`)}>정보 수정</button>
           </div>
 
           {isAiMode && (
@@ -110,7 +114,6 @@ export default function ViewBook() {
                   rows="4"
                   value={tempContent}
                   onChange={(e) => setTempContent(e.target.value)}
-                  disabled={isPatching}
                   placeholder="원하는 프롬프트를 입력하면 새로운 표지를 그려냅니다. 미입력 시 책 제목과 내용을 기반으로 표지는 랜덤 생성됩니다."
                 />
               </div>
@@ -120,5 +123,6 @@ export default function ViewBook() {
         </div>
       </div>
     </div>
+    </>
   );
 }

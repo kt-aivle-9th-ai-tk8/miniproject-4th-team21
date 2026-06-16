@@ -1,24 +1,27 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { fetchBookById, deleteBook } from '../api/bookApi';
-import UnavailableBackend from './UnavailableBackend';
+import { useServerRequest } from '../hooks/useServerRequest';
 
 function RemoveBook() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { startLoading, handleServerError, clearStatus, overlay } = useServerRequest();
     const [book, setBook] = useState(null);
-    const [serverError, setServerError] = useState(false);
 
     const loadBook = () => {
-        setServerError(false);
+        startLoading();
         fetchBookById(id).then(res => {
             if (res.success) {
+                clearStatus();
                 setBook(res.data);
             } else if (res.status === 404) {
+                clearStatus();
                 navigate('/error/not-found');
             } else if (res.errorType === 'NETWORK_ERROR' || res.errorType === 'SERVER_ERROR') {
-                setServerError(true);
+                handleServerError(loadBook);
             } else {
+                clearStatus();
                 navigate('/error');
             }
         });
@@ -27,22 +30,27 @@ function RemoveBook() {
     useEffect(() => { loadBook(); }, [id]);
 
     const handleConfirmDelete = async () => {
+        startLoading();
         const res = await deleteBook(Number(id));
         if (res.success) {
+            clearStatus();
             navigate('/books');
         } else if (res.status === 404) {
+            clearStatus();
             navigate('/error/not-found');
         } else if (res.errorType === 'NETWORK_ERROR' || res.errorType === 'SERVER_ERROR') {
-            setServerError(true);
+            handleServerError(handleConfirmDelete); // retry 기작은 자기자신
         } else {
+            clearStatus();
             navigate('/error');
         }
     };
 
-    if (serverError) return <UnavailableBackend onRetry={() => book ? setServerError(false) : loadBook()} />;
-    if (!book) return <p className="status-text">불러오는 중...</p>;
+    if (!book) return overlay;
 
     return (
+        <>
+        {overlay}
         <div className="modal-overlay">
             <div className="remove-container">
                 <h2>도서 삭제 확인</h2>
@@ -53,6 +61,7 @@ function RemoveBook() {
                 </div>
             </div>
         </div>
+        </>
     );
 }
 

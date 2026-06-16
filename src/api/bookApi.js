@@ -16,7 +16,7 @@ export const runBookRequest = async (request, { errorMessage } = {}) => {
     }
 
     let errorBody = null;
-    try { errorBody = await response.json(); } catch { try { errorBody = await response.text(); } catch {} }
+    try { errorBody = await response.json(); } catch { try { errorBody = await response.text(); } catch { /* 본문을 읽을 수 없으면 무시 */ } }
     return { success: false, status: response.status, errorType: response.status >= 500 ? 'SERVER_ERROR' : 'CLIENT_ERROR', error: errorBody };
   } catch (error) {
     if (errorMessage) console.error(errorMessage, error);

@@ -3,24 +3,27 @@ import { useNavigate, useParams } from "react-router-dom";
 import BookForm from "./BookForm";
 import BookCoverAIRequest from "./BookCoverAIRequest";
 import { fetchBookById, updateBook } from "../api/bookApi";
-import UnavailableBackend from "./UnavailableBackend";
+import { useServerRequest } from "../hooks/useServerRequest";
 
 function EditBook() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { startLoading, handleServerError, clearStatus, overlay } = useServerRequest();
     const [book, setBook] = useState(null);
-    const [serverError, setServerError] = useState(false);
 
     const loadBook = () => {
-        setServerError(false);
+        startLoading();
         fetchBookById(id).then(res => {
             if (res.success) {
+                clearStatus();
                 setBook(res.data);
             } else if (res.status === 404) {
+                clearStatus();
                 navigate('/error/not-found');
             } else if (res.errorType === 'NETWORK_ERROR' || res.errorType === 'SERVER_ERROR') {
-                setServerError(true);
+                handleServerError(loadBook); // retry 기작은 자기자신
             } else {
+                clearStatus();
                 navigate('/error');
             }
         });
@@ -30,32 +33,36 @@ function EditBook() {
 
     const handleFieldChange = (updatedBook) => setBook(updatedBook);
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (!book.title || !book.author) {
-            alert("제목과 저자는 필수 입력 사항입니다.");
-            return;
-        }
-        if (!book.category) {
-            alert("카테고리는 필수 선택 사항입니다.");
-            return;
-        }
+    const submitBook = async () => {
+        startLoading();
         const res = await updateBook(Number(id), book);
         if (res.success) {
+            clearStatus();
             navigate(`/books/${res.data.id}`);
         } else if (res.status === 404) {
+            clearStatus();
             navigate('/error/not-found');
         } else if (res.errorType === 'NETWORK_ERROR' || res.errorType === 'SERVER_ERROR') {
-            setServerError(true);
+            handleServerError(submitBook); // 수정 내용은 book state에 유지되므로 동일 내용으로 재시도
         } else {
+            clearStatus();
             navigate('/error');
         }
     };
 
-    if (serverError) return <UnavailableBackend onRetry={() => book ? setServerError(false) : loadBook()} />;
-    if (!book) return <p className="status-text">불러오는 중...</p>;
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (!book.title || !book.author) { alert("제목과 저자는 필수 입력 사항입니다."); return; }
+        if (!book.category) { alert("카테고리는 필수 선택 사항입니다."); return; }
+        if (!book.content.trim()) { alert("내용은 필수 입력 사항입니다."); return; }
+        submitBook();
+    };
+
+    if (!book) return overlay;
 
     return (
+        <>
+        {overlay}
         <div className="form-page-container">
             <h1>책 내용 수정</h1>
             <BookForm book={book} onFieldChange={handleFieldChange} />
@@ -65,6 +72,7 @@ function EditBook() {
                 <button type="button" onClick={() => navigate(-1)} className="cancel-button">취소</button>
             </div>
         </div>
+        </>
     );
 }
 
