@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { Routes, Route, useNavigate } from 'react-router-dom';
 import './App.css';
 import Header from './components/Header';
 import Footer from './components/Footer';
@@ -11,11 +12,11 @@ import UnavailableBook from './components/UnavailableBook';
 import UnavailableBackend from './components/UnavailableBackend';
 import ProblemOccured from './components/ProblemOccured';
 function App() {
+  const navigate = useNavigate();
+
   // 1. 상태(State) 관리
   const [books, setBooks] = useState([]); // 전체 도서 목록 상태
-  const [currentView, setCurrentView] = useState('list');
-  const [selectedBookId, setSelectedBookId] = useState(999); // 선택된 도서의 ID 관리
-  const [prevPage, setPrevPage] = useState('list'); // 이전 페이지(화면) 저장
+  const [serverError, setServerError] = useState(false); // 백엔드 연결 실패 상태
 
   // 백엔드 데이터베이스 연결 주소
   const API_URL = 'http://localhost:8080/books';
@@ -86,20 +87,11 @@ function App() {
       setBooks(Array.isArray(booksResponse.data) ? booksResponse.data : []);
     } else {
       if (booksResponse.errorType === 'NETWORK_ERROR' || booksResponse.errorType === 'SERVER_ERROR') {
-        setCurrentView('backendunavailable');
+        setServerError(true);
       } else {
-
-        setCurrentView('problemoccured');
-
+        navigate('/error');
       }
     }
-  };
-
-  // 3. 화면 전환 핸들러 (인자: bookId정수값, view이름)
-  const handleTransform = (viewName, bookId) => {
-    setPrevPage(currentView); // 화면 전환전 화면을 저장
-    setCurrentView(viewName);
-    setSelectedBookId(bookId);
   };
 
   // AI 표지가 성공적으로 생성되었을 때 호출되는 백엔드 PATCH 콜백
@@ -118,21 +110,18 @@ function App() {
     if (coverResponse.success) {
       const finalBook = coverResponse.data; 
       alert("생성된 AI 표지가 최종 반영되었습니다!");
-      setBooks(prevBooks => 
-        prevBooks.map(b => b.id === finalBook.id ? finalBook : b)
-      );
-
-      setSelectedBookId(finalBook.id); 
-      setCurrentView('list'); 
+      setBooks(prevBooks => prevBooks.map(b => b.id === finalBook.id ? finalBook : b));
+      navigate('/');
       return true;
     } else {
       if (coverResponse.errorType === 'NETWORK_ERROR' || coverResponse.errorType === 'SERVER_ERROR') {
-        setCurrentView('backendunavailable');
-      } else if (coverResponse.status === 404) { setCurrentView('unavailable') } 
-      else {
-        setCurrentView('problemoccured');
+        setServerError(true);
+      } else if (coverResponse.status === 404) {
+        navigate('/error/not-found');
+      } else {
+        navigate('/error');
       }
-      
+
       alert("표지를 저장하는 데 실패했습니다.");
       return false;
     }
@@ -159,14 +148,13 @@ function App() {
     );
 
     if (newBookResponse.success) {
-      setBooks(prevBooks => [...prevBooks, newBookResponse.data]); 
-      setCurrentView('view'); 
-      setSelectedBookId(newBookResponse.data.id);
+      setBooks(prevBooks => [...prevBooks, newBookResponse.data]);
+      navigate(`/books/${newBookResponse.data.id}`);
     } else {
       if (newBookResponse.errorType === 'NETWORK_ERROR' || newBookResponse.errorType === 'SERVER_ERROR') {
-        setCurrentView('backendunavailable');
+        setServerError(true);
       } else {
-        setCurrentView('problemoccured');
+        navigate('/error');
       }
     }
   };
@@ -190,15 +178,14 @@ function App() {
 
     if (revisedBookResponse.success) {
       setBooks(prevBooks => prevBooks.map(book => book.id === bookId ? revisedBookResponse.data : book));
-      setCurrentView('view');
-      setSelectedBookId(revisedBookResponse.data.id);
+      navigate(`/books/${revisedBookResponse.data.id}`);
     } else {
       if (revisedBookResponse.errorType === 'NETWORK_ERROR' || revisedBookResponse.errorType === 'SERVER_ERROR') {
-        setCurrentView('backendunavailable');
+        setServerError(true);
       } else if (revisedBookResponse.status === 404) {
-        setCurrentView('unavailable');
+        navigate('/error/not-found');
       } else {
-        setCurrentView('problemoccured');
+        navigate('/error');
       }
     }
   };
@@ -214,89 +201,58 @@ function App() {
 
     if (deleted.success) {
       setBooks(prevBooks => prevBooks.filter(book => book.id !== bookId));
-      setCurrentView('list'); 
-      setSelectedBookId(null);
+      navigate('/');
     } else {
       if (deleted.errorType === 'NETWORK_ERROR' || deleted.errorType === 'SERVER_ERROR') {
-        setCurrentView('backendunavailable');
+        setServerError(true);
       } else if (deleted.status === 404) {
-        setCurrentView('unavailable');
+        navigate('/error/not-found');
       } else {
-        setCurrentView('problemoccured');
+        navigate('/error');
       }
-    }
-  };
-
-  const currentBook = books.find(book => book.id === selectedBookId);
-
-  const renderView = () => {
-    switch (currentView) {
-      case 'list':
-        return (
-          <BookList
-            books={books}
-            onTransform={handleTransform}
-            onSearch={fetchBooks}
-          />
-        );
-      case 'add':
-        return (
-          <AddBook
-            onSubmit={handleSubmit}
-            onTransform={handleTransform}
-          />
-        );
-      case 'edit':
-        return (
-          <EditBook
-            book={currentBook}
-            onRevise={handleRevise}
-            onTransform={handleTransform}
-            prevPage={prevPage}
-          />
-        );
-      case 'view':
-        return (
-          <ViewBook
-            book={currentBook}
-            onTransform={handleTransform}
-            onUpdateCover={handleUpdateCoverApi}
-          />
-        );
-      case 'remove':
-        return (
-          <RemoveBook
-            book={currentBook}
-            onDelete={handleDelete}
-            onTransform={handleTransform}
-            prevPage={prevPage}
-          />
-        );
-      case 'unavailable':
-        return (
-          <UnavailableBook />
-        );
-      case 'backendunavailable':
-        return (
-          <UnavailableBackend />
-        );
-      case 'problemoccured':
-        return (
-          <ProblemOccured />
-        );
-      default:
-        return <BookList books={books} onTransform={handleTransform} onSearch={fetchBooks} />;
     }
   };
 
   return (
     <div className="app-container">
-      {currentView !== 'backendunavailable' && (
-        <Header onTransform={handleTransform} currentPage={currentView} />
-      )}
+      <Header />
+      {serverError && <UnavailableBackend onRetry={() => { setServerError(false); fetchBooks(); }} />}
 
       <main className="main-content">
-        {renderView()}
+        <Routes>
+          <Route path="/" element={
+            <BookList
+              books={books}
+              onSearch={fetchBooks}
+            />
+          } />
+          <Route path="/books/new" element={
+            <AddBook
+              onSubmit={handleSubmit}
+            />
+          } />
+          <Route path="/books/:id" element={
+            <ViewBook
+              books={books}
+              onUpdateCover={handleUpdateCoverApi}
+            />
+          } />
+          <Route path="/books/:id/edit" element={
+            <EditBook
+              books={books}
+              onRevise={handleRevise}
+            />
+          } />
+          <Route path="/books/:id/delete" element={
+            <RemoveBook
+              books={books}
+              onDelete={handleDelete}
+            />
+          } />
+          <Route path="/error/not-found" element={<UnavailableBook />} />
+          <Route path="/error" element={<ProblemOccured />} />
+          <Route path="*" element={<UnavailableBook />} />
+        </Routes>
       </main>
 
       <Footer />

@@ -1,7 +1,13 @@
-function RemoveBook({book, onDelete, onTransform, prevPage}) {
+import { useNavigate, useParams } from 'react-router-dom';
+
+function RemoveBook({books, onDelete}) {
+    const { id } = useParams();
+    const book = books.find(b => b.id === Number(id));
+    const navigate = useNavigate();
+
     // book 데이터 없을 때
     if (book === null || book === undefined) {
-        onTransform('unavailable');
+        navigate('/error/not-found');
         return null;
     }
 
@@ -14,13 +20,7 @@ function RemoveBook({book, onDelete, onTransform, prevPage}) {
 
     // '취소' 버튼 눌렀을 때
     const handleCancel = () => {
-        if (prevPage === 'view') {
-            // 상세 페이지
-            onTransform('view', book.id);
-        } else {
-            // 도서 목록
-            onTransform('list');
-        }
+        navigate(-1);
     };
 
     return (

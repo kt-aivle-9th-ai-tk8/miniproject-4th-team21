@@ -1,12 +1,14 @@
+import { useNavigate } from 'react-router-dom';
 import { CATEGORY_OPTIONS } from '../constants/categoryOptions';
 import '../App.css';
 
 
-function BookItem({ id, title, author, category, coverImageUrl, createdAt, updatedAt, onTransform }) {
+function BookItem({ id, title, author, category, coverImageUrl, createdAt, updatedAt }) {
+    const navigate = useNavigate();
     // 목록에서 삭제
     const handleDeleteClick = (e) => {
         e.stopPropagation();
-        onTransform('remove', id);
+        navigate(`/books/${id}/delete`);
     }
 
     // 날짜 표시 보정: ISO("2023-01-01T00:00:00Z")이든 toLocaleString 결과이든 YYYY-MM-DD로 통일
@@ -28,7 +30,7 @@ function BookItem({ id, title, author, category, coverImageUrl, createdAt, updat
 
   return (
     <li className="book-card"
-        onClick={() => onTransform('view', id)} // 버튼X, 카드 어디든 누르면 상세보기로 이동
+        onClick={() => navigate(`/books/${id}`)} // 버튼X, 카드 어디든 누르면 상세보기로 이동
     >
         <div className="book-image">
             {coverImageUrl && (
